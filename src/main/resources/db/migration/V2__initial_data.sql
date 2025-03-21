@@ -3,6 +3,7 @@
 
 -- Insert region factors for German federal states
 INSERT INTO region_factors (federal_state, factor) VALUES
+('DEFAULT', 1.0),
 ('Baden-Württemberg', 1.2),
 ('Bayern', 1.1),
 ('Berlin', 1.4),

@@ -20,6 +20,16 @@ import jakarta.validation.constraints.NotBlank;
 )
 public class Region extends BaseEntity {
 
+    public Region(String federalState, String country, String area, String city, String postalCode, String district, RegionFactor regionFactor) {
+        this.federalState = federalState;
+        this.country = country;
+        this.area = area;
+        this.city = city;
+        this.postalCode = postalCode;
+        this.district = district;
+        this.regionFactor = regionFactor;
+    }
+
     @NotBlank
     @Column(name = "federal_state", nullable = false)
     private String federalState;
