@@ -334,7 +334,7 @@ Ich würde folgende Frameworks verwenden:
 
 ## Qualitätssicherung
 
-- **Continuous Integration** mit GitHub Actions (out of scope)
+- **Continuous Integration** mit GitHub Actions oder ähnlichem (out of scope)
 - **Code-Qualitätsanalyse** mit SonarLint/SonarQube
 - **Code-Reviews** für alle Änderungen (out of scope)
 - **Automatisierte Tests** für alle Komponenten
@@ -347,10 +347,10 @@ Ich würde folgende Frameworks verwenden:
    - Konfiguration der Datenbank (done)
    - Einrichtung von Flyway für Datenbankmigrationen (done)
 
-2. **Kernfunktionalität**
+2. **Kernfunktionalität (done)**
    - Implementierung des Datenmodells (done)
    - Erstellung der Flyway-Migrationsskripte (done)
-   - Implementierung der Berechnungslogik
+   - Implementierung der Berechnungslogik (done)
    - Import der CSV-Daten (done)
 
 3. **Web-Interface und API-Entwicklung**

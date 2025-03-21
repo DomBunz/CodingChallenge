@@ -1,12 +1,9 @@
-package com.insurance.premium.calculation.dto;
+package com.insurance.premium.application.dto;
 
-/**
- * Data Transfer Object for premium calculation requests
- */
-public record PremiumCalculationRequest(
+public record ApplicationRequest(
     String postalCode,
     String vehicleType,
-    int annualMileage
+    Integer annualMileage
 ) {
     /**
      * Returns a validation error message if the request is invalid
@@ -16,12 +13,12 @@ public record PremiumCalculationRequest(
     public String getValidationError() {
         String s = "";
         if (postalCode == null || postalCode.isBlank()) {
-            s = "Postal code is required. ";
+            s += "Postal code is required. ";
         }
         if (vehicleType == null || vehicleType.isBlank()) {
             s += "Vehicle type is required. ";
         }
-        if (annualMileage <= 0) {
+        if (annualMileage == null || annualMileage < 0) {
             s += "Annual mileage must be a positive number.";
         }
         return s.isBlank() ? null : s.trim();

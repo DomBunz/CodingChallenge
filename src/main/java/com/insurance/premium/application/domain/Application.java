@@ -16,6 +16,23 @@ import java.time.LocalDateTime;
 @Table(name = "applications")
 public class Application extends BaseEntity {
 
+    public Application() {} // default constructor for JPA
+
+    public Application(Integer annualMileage, String vehicleType, String postalCode, BigDecimal basePremium,
+            BigDecimal mileageFactor, BigDecimal vehicleFactor, BigDecimal regionFactor, BigDecimal calculatedPremium,
+            LocalDateTime createdAt, Status status) {
+        this.annualMileage = annualMileage;
+        this.vehicleType = vehicleType;
+        this.postalCode = postalCode;
+        this.basePremium = basePremium;
+        this.mileageFactor = mileageFactor;
+        this.vehicleFactor = vehicleFactor;
+        this.regionFactor = regionFactor;
+        this.calculatedPremium = calculatedPremium;
+        this.createdAt = createdAt;
+        this.status = status;
+    }
+
     public enum Status {
         NEW,
         ACCEPTED,

@@ -51,10 +51,13 @@ public class PremiumCalculationService {
      */
     @Transactional(readOnly = true)
     public PremiumCalculationResult calculatePremium(PremiumCalculationRequest request) {
-        String err = null;
-        if (request == null || (err = request.getValidationError()) != null) {
-            throw new IllegalArgumentException("Invalid request: " + 
-                    (request == null ? "Request is null" : err));
+        if (request == null) {
+            throw new IllegalArgumentException("Request cannot be null");
+        } else {
+            String err = request.getValidationError();
+            if (err != null) {
+                throw new IllegalArgumentException("Invalid request: " + err);
+            }
         }
         
         RegionFactor region = findRegionFactor(request.postalCode());
