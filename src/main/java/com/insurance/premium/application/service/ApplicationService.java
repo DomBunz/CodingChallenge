@@ -2,6 +2,8 @@ package com.insurance.premium.application.service;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -78,12 +80,33 @@ public class ApplicationService {
     }
     
     /**
+     * Get all applications with pagination
+     * 
+     * @param pageable Pagination information
+     * @return Page of applications
+     */
+    public Page<Application> getAllApplications(Pageable pageable) {
+        return applicationRepository.findAll(pageable);
+    }
+    
+    /**
      * Get all applications
      * 
      * @return List of all applications
      */
     public List<Application> getAllApplications() {
         return applicationRepository.findAll();
+    }
+    
+    /**
+     * Get applications by status with pagination
+     * 
+     * @param status The application status
+     * @param pageable Pagination information
+     * @return Page of applications with the given status
+     */
+    public Page<Application> getApplicationsByStatus(Status status, Pageable pageable) {
+        return applicationRepository.findByStatus(status, pageable);
     }
     
     /**

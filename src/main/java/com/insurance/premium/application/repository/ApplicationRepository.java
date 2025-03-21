@@ -1,6 +1,8 @@
 package com.insurance.premium.application.repository;
 
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Repository;
 
 import com.insurance.premium.application.domain.Application;
@@ -11,6 +13,15 @@ import java.util.List;
 
 @Repository
 public interface ApplicationRepository extends JpaRepository<Application, Long> {
+    
+    /**
+     * Find applications by status with pagination
+     * 
+     * @param status The application status
+     * @param pageable Pagination information
+     * @return Page of applications with the given status
+     */
+    Page<Application> findByStatus(Status status, Pageable pageable);
     
     /**
      * Find applications by status

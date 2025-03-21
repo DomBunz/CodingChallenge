@@ -201,6 +201,8 @@ Die Migrationsskripte werden im Ressourcenverzeichnis `src/main/resources/db/mig
 #### REST-API
 
 - `GET /api/factors` - Liefert alle verfügbaren Faktoren
+- `GET /api/factors/region` - Liefert alle verfügbaren Region-Faktoren
+- `GET /api/factors/vehicle` - Liefert alle verfügbaren Fahrzeugtyp-Faktor
 - `GET /api/zip` - Liefert alle Postleitzahlen
 - `POST /api/calculate` - Berechnet die Prämie basierend auf den Eingabeparametern
 - `POST /api/claim` - Erstellt einen neuen Antrag
