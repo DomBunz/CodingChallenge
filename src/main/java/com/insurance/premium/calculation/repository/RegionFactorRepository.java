@@ -18,6 +18,4 @@ public interface RegionFactorRepository extends JpaRepository<RegionFactor, Long
      */
     @Query("SELECT rf FROM RegionFactor rf WHERE rf.federalState = 'DEFAULT'")
     Optional<RegionFactor> findDefaultRegionFactor();
-    
-    // findAll() method is inherited from JpaRepository
 }

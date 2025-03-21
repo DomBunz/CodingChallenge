@@ -20,6 +20,8 @@ import jakarta.validation.constraints.NotBlank;
 )
 public class Region extends BaseEntity {
 
+    public Region() {} // default constructor for JPA
+
     public Region(String federalState, String country, String area, String city, String postalCode, String district, RegionFactor regionFactor) {
         this.federalState = federalState;
         this.country = country;
