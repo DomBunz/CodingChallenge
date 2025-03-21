@@ -114,6 +114,13 @@ Diese Technologiewahl bietet einen einfacheren Ansatz als ein komplexes Frontend
    - Erstellungsdatum
    - Status
 
+4. **System-Config**
+   - ID
+   - Schlüssel
+   - Wert
+   - Beschreibung
+   - Letzte Änderung
+
 ### Datenbankmigrationen
 
 Die Datenbankmigrationen werden mit Flyway in versionierten SQL-Skripten implementiert:
@@ -335,16 +342,16 @@ Ich würde folgende Frameworks verwenden:
 
 ## Implementierungsreihenfolge
 
-1. **Setup des Projekts**
-   - Einrichtung der Projektstruktur
-   - Konfiguration der Datenbank
-   - Einrichtung von Flyway für Datenbankmigrationen
+1. **Setup des Projekts (done)**
+   - Einrichtung der Projektstruktur (done)
+   - Konfiguration der Datenbank (done)
+   - Einrichtung von Flyway für Datenbankmigrationen (done)
 
 2. **Kernfunktionalität**
-   - Implementierung des Datenmodells
-   - Erstellung der Flyway-Migrationsskripte
+   - Implementierung des Datenmodells (done)
+   - Erstellung der Flyway-Migrationsskripte (done)
    - Implementierung der Berechnungslogik
-   - Import der CSV-Daten
+   - Import der CSV-Daten (done)
 
 3. **Web-Interface und API-Entwicklung**
    - Implementierung der REST-Endpunkte
@@ -353,10 +360,9 @@ Ich würde folgende Frameworks verwenden:
    - Dokumentation der API
 
 4. **Tests und Qualitätssicherung**
-   - Implementierung der Tests
+   - Implementierung der Tests (wip)
    - Code-Qualitätsanalyse
-   - Performance-Tests
-   - Einrichtung der CI/CD-Pipeline
+   - Performance-Tests (wenn nötig)
 
 ## Mögliche zukünftige Erweiterungen
 

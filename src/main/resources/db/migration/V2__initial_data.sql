@@ -38,3 +38,7 @@ INSERT INTO mileage_factors (min_mileage, max_mileage, factor) VALUES
 (5001, 10000, 1.0),
 (10001, 20000, 1.5),
 (20001, NULL, 2.0);
+
+-- Insert system configurations
+INSERT INTO system_configurations (config_key, config_value, description) VALUES
+('BASE_PREMIUM', '500.00', 'Base premium amount in EUR for insurance calculations');

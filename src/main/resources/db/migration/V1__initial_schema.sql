@@ -51,6 +51,15 @@ CREATE TABLE applications (
     CONSTRAINT chk_application_status CHECK (status IN ('NEW', 'ACCEPTED', 'REJECTED'))
 );
 
+CREATE TABLE system_configurations (
+    id BIGSERIAL PRIMARY KEY,
+    config_key VARCHAR(100) NOT NULL,
+    config_value VARCHAR(255) NOT NULL,
+    description TEXT,
+    last_modified TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    CONSTRAINT uk_system_configurations_key UNIQUE (config_key)
+);
+
 -- Create indices for better query performance
 CREATE INDEX idx_regions_postal_code ON regions(postal_code);
 CREATE INDEX idx_applications_created_at ON applications(created_at);
