@@ -3,7 +3,6 @@ package com.insurance.premium.calculation.service;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.math.BigDecimal;
 import java.nio.charset.StandardCharsets;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -20,8 +19,6 @@ import javax.sql.DataSource;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.context.event.ApplicationReadyEvent;
 import org.springframework.context.event.EventListener;
 import org.springframework.core.io.ClassPathResource;
@@ -49,7 +46,6 @@ public class RegionDataLoader {
     private final RegionFactorRepository regionFactorRepository;
     private final DataSource dataSource;
     
-    @Autowired
     public RegionDataLoader(RegionRepository regionRepository,
                             RegionFactorRepository regionFactorRepository,
                             DataSource dataSource) {
@@ -87,6 +83,7 @@ public class RegionDataLoader {
      * @param regions List of Region entities to insert
      * @throws SQLException if a database error occurs
      */
+    @SuppressWarnings("java:S2139") // general exception catching
     private void insertRegionsWithJdbc(List<Region> regions) throws SQLException {
         final int batchSize = 500;
         try (Connection conn = dataSource.getConnection()) {
@@ -135,6 +132,7 @@ public class RegionDataLoader {
      * @throws IOException if an I/O error occurs
      * @throws CsvValidationException if the CSV file is invalid
      */
+    @SuppressWarnings({"java:S3776", "java:S135"}) // complex method and multiple continues
     private List<Region> parseRegionsFromCsv() throws IOException, CsvValidationException {
         List<Region> regions = new ArrayList<>();
         Resource resource = new ClassPathResource(CSV_FILE_PATH);

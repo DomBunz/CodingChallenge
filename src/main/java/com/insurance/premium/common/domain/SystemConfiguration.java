@@ -10,6 +10,7 @@ import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "system_configurations")
+@SuppressWarnings("java:S2160") // equals and hashCode are in BaseEntity
 public class SystemConfiguration extends BaseEntity {
 
     @NotBlank

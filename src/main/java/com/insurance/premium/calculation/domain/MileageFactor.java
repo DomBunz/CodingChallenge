@@ -17,6 +17,7 @@ import java.math.BigDecimal;
         columnNames = {"min_mileage", "max_mileage"}
     )
 )
+@SuppressWarnings("java:S2160") // equals and hashCode are in BaseEntity
 public class MileageFactor extends BaseEntity {
 
     @NotNull

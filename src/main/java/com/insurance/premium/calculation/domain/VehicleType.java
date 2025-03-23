@@ -12,6 +12,7 @@ import java.math.BigDecimal;
 
 @Entity
 @Table(name = "vehicle_types")
+@SuppressWarnings("java:S2160") // equals and hashCode are in BaseEntity
 public class VehicleType extends BaseEntity {
 
     @NotBlank

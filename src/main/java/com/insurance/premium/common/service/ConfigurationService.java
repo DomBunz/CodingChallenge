@@ -2,6 +2,9 @@ package com.insurance.premium.common.service;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.List;
+import java.util.Optional;
+import java.util.Set;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -19,14 +22,17 @@ public class ConfigurationService {
     private static final Logger logger = LoggerFactory.getLogger(ConfigurationService.class);
     private static final String BASE_PREMIUM_KEY = "BASE_PREMIUM";
     
+    // Set of allowed configuration keys
+    private static final Set<String> ALLOWED_KEYS = Set.of(BASE_PREMIUM_KEY);
+    
     private final SystemConfigurationRepository configurationRepository;
     
     // Self injection so transaction proxies are not bypassed by direct method calls
+    @SuppressWarnings("java:S6813") // self injection
     @Autowired
     @Lazy
     private ConfigurationService self;
     
-    @Autowired
     public ConfigurationService(SystemConfigurationRepository configurationRepository) {
         this.configurationRepository = configurationRepository;
     }
@@ -69,15 +75,51 @@ public class ConfigurationService {
     }
     
     /**
+     * Get all system configurations
+     * 
+     * @return List of all configurations
+     */
+    @Transactional(readOnly = true)
+    public List<SystemConfiguration> getAllConfigurations() {
+        return configurationRepository.findAll();
+    }
+    
+    /**
+     * Get a configuration by its key
+     * 
+     * @param key The configuration key
+     * @return Optional containing the configuration if found
+     */
+    @Transactional(readOnly = true)
+    public Optional<SystemConfiguration> getConfigurationByKey(String key) {
+        return configurationRepository.findByKey(key);
+    }
+    
+    /**
+     * Check if a configuration key is allowed
+     * 
+     * @param key The configuration key to check
+     * @return true if the key is allowed, false otherwise
+     */
+    public boolean isKeyAllowed(String key) {
+        return ALLOWED_KEYS.contains(key);
+    }
+    
+    /**
      * Update a configuration value
      * 
      * @param key The configuration key
      * @param value The new value
      * @param description The configuration description (optional, only used when creating a new configuration)
      * @return The updated or created SystemConfiguration
+     * @throws IllegalArgumentException if the key is not allowed
      */
     @Transactional
     public SystemConfiguration updateConfiguration(String key, String value, String description) {
+        if (!isKeyAllowed(key)) {
+            throw new IllegalArgumentException("Configuration key not allowed: " + key);
+        }
+        
         SystemConfiguration config = configurationRepository.findByKey(key)
                 .orElse(new SystemConfiguration());
         

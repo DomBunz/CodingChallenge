@@ -1,6 +1,8 @@
 package com.insurance.premium.application.repository;
 
-import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -51,16 +53,14 @@ class ApplicationRepositoryTest {
         List<Application> rejectedApplications = applicationRepository.findByStatus(Status.REJECTED);
         
         // Assert
-        assertThat(newApplications).hasSize(2);
-        assertThat(acceptedApplications).hasSize(1);
-        assertThat(rejectedApplications).hasSize(1);
+        assertEquals(2, newApplications.size());
+        assertEquals(1, acceptedApplications.size());
+        assertEquals(1, rejectedApplications.size());
         
-        assertThat(newApplications).extracting(Application::getPostalCode)
-            .containsExactlyInAnyOrder("10115", "10117");
-        assertThat(acceptedApplications).extracting(Application::getPostalCode)
-            .containsExactly("20095");
-        assertThat(rejectedApplications).extracting(Application::getPostalCode)
-            .containsExactly("30159");
+        assertTrue(newApplications.stream().map(Application::getPostalCode).anyMatch(pc -> pc.equals("10115")));
+        assertTrue(newApplications.stream().map(Application::getPostalCode).anyMatch(pc -> pc.equals("10117")));
+        assertEquals("20095", acceptedApplications.get(0).getPostalCode());
+        assertEquals("30159", rejectedApplications.get(0).getPostalCode());
     }
     
     @Test
@@ -89,16 +89,16 @@ class ApplicationRepositoryTest {
         Page<Application> thirdPage = applicationRepository.findByStatus(Status.NEW, thirdPageable);
         
         // Assert
-        assertThat(firstPage.getContent()).hasSize(10);
-        assertThat(secondPage.getContent()).hasSize(10);
-        assertThat(thirdPage.getContent()).hasSize(5);
+        assertEquals(10, firstPage.getContent().size());
+        assertEquals(10, secondPage.getContent().size());
+        assertEquals(5, thirdPage.getContent().size());
         
-        assertThat(firstPage.getTotalElements()).isEqualTo(25);
-        assertThat(firstPage.getTotalPages()).isEqualTo(3);
+        assertEquals(25, firstPage.getTotalElements());
+        assertEquals(3, firstPage.getTotalPages());
         
-        assertThat(firstPage.getNumber()).isEqualTo(0);
-        assertThat(secondPage.getNumber()).isEqualTo(1);
-        assertThat(thirdPage.getNumber()).isEqualTo(2);
+        assertEquals(0, firstPage.getNumber());
+        assertEquals(1, secondPage.getNumber());
+        assertEquals(2, thirdPage.getNumber());
     }
     
     @Test
@@ -114,9 +114,20 @@ class ApplicationRepositoryTest {
         List<Application> foundApplications = applicationRepository.findByPostalCode("10115");
         
         // Assert
-        assertThat(foundApplications).hasSize(2);
-        assertThat(foundApplications).extracting(Application::getVehicleType)
-            .containsExactlyInAnyOrder("Kompaktklasse", "Van");
+        assertEquals(2, foundApplications.size());
+        
+        // Check that both vehicle types are present
+        boolean hasKompaktklasse = false;
+        boolean hasVan = false;
+        for (Application app : foundApplications) {
+            if ("Kompaktklasse".equals(app.getVehicleType())) {
+                hasKompaktklasse = true;
+            } else if ("Van".equals(app.getVehicleType())) {
+                hasVan = true;
+            }
+        }
+        assertTrue(hasKompaktklasse);
+        assertTrue(hasVan);
     }
     
     @Test
@@ -132,9 +143,20 @@ class ApplicationRepositoryTest {
         List<Application> foundApplications = applicationRepository.findByVehicleType("Kompaktklasse");
         
         // Assert
-        assertThat(foundApplications).hasSize(2);
-        assertThat(foundApplications).extracting(Application::getPostalCode)
-            .containsExactlyInAnyOrder("10115", "20095");
+        assertEquals(2, foundApplications.size());
+        
+        // Check that both postal codes are present
+        boolean has10115 = false;
+        boolean has20095 = false;
+        for (Application app : foundApplications) {
+            if ("10115".equals(app.getPostalCode())) {
+                has10115 = true;
+            } else if ("20095".equals(app.getPostalCode())) {
+                has20095 = true;
+            }
+        }
+        assertTrue(has10115);
+        assertTrue(has20095);
     }
     
     @Test
@@ -155,9 +177,20 @@ class ApplicationRepositoryTest {
         List<Application> recentApplications = applicationRepository.findByCreatedAtAfter(yesterday.minusHours(1));
         
         // Assert
-        assertThat(recentApplications).hasSize(2);
-        assertThat(recentApplications).extracting(Application::getPostalCode)
-            .containsExactlyInAnyOrder("10115", "20095");
+        assertEquals(2, recentApplications.size());
+        
+        // Check that both recent postal codes are present
+        boolean has10115 = false;
+        boolean has20095 = false;
+        for (Application app : recentApplications) {
+            if ("10115".equals(app.getPostalCode())) {
+                has10115 = true;
+            } else if ("20095".equals(app.getPostalCode())) {
+                has20095 = true;
+            }
+        }
+        assertTrue(has10115);
+        assertTrue(has20095);
     }
     
     @Test
@@ -169,14 +202,14 @@ class ApplicationRepositoryTest {
         Application savedApplication = applicationRepository.save(application);
         
         // Assert
-        assertThat(savedApplication.getId()).isNotNull();
+        assertNotNull(savedApplication.getId());
         
         // Verify it can be retrieved
         Application retrievedApplication = applicationRepository.findById(savedApplication.getId()).orElse(null);
-        assertThat(retrievedApplication).isNotNull();
-        assertThat(retrievedApplication.getPostalCode()).isEqualTo("10115");
-        assertThat(retrievedApplication.getVehicleType()).isEqualTo("Kompaktklasse");
-        assertThat(retrievedApplication.getStatus()).isEqualTo(Status.NEW);
+        assertNotNull(retrievedApplication);
+        assertEquals("10115", retrievedApplication.getPostalCode());
+        assertEquals("Kompaktklasse", retrievedApplication.getVehicleType());
+        assertEquals(Status.NEW, retrievedApplication.getStatus());
     }
     
     @Test
@@ -189,7 +222,7 @@ class ApplicationRepositoryTest {
         applicationRepository.delete(savedApplication);
         
         // Assert
-        assertThat(applicationRepository.findById(savedApplication.getId())).isEmpty();
+        assertTrue(applicationRepository.findById(savedApplication.getId()).isEmpty());
     }
     
     // Helper method to create test applications
@@ -199,7 +232,7 @@ class ApplicationRepositoryTest {
     
     private Application createApplicationWithDate(String postalCode, String vehicleType, Status status, LocalDateTime createdAt) {
         return new Application(
-            15000, // annualMileage
+            10000, // annualMileage
             vehicleType,
             postalCode,
             new BigDecimal("500.00"), // basePremium

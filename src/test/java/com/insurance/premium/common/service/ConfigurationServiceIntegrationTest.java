@@ -47,7 +47,7 @@ class ConfigurationServiceIntegrationTest {
     @Test
     void getConfigValue_WithNonExistentKey_ReturnsDefaultValue() {
         // Act
-        String value = configurationService.getConfigValue("NON_EXISTENT_KEY", "default");
+        String value = configurationService.getConfigValue("BASE_PREMIUM", "default");
         
         // Assert
         assertEquals("default", value);
@@ -56,8 +56,8 @@ class ConfigurationServiceIntegrationTest {
     @Test
     void updateConfiguration_CreatesNewConfigurationAndRetrievesIt() {
         // Arrange
-        String key = "TEST_CONFIG";
-        String value = "test_value";
+        String key = "BASE_PREMIUM";
+        String value = "750.00";
         String description = "Test configuration";
         
         // Act

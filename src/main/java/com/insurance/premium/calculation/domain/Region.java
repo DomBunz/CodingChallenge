@@ -18,6 +18,7 @@ import jakarta.validation.constraints.NotBlank;
         columnNames = {"federal_state", "country", "area", "city", "postal_code", "district"}
     )
 )
+@SuppressWarnings("java:S2160") // equals and hashCode are in BaseEntity
 public class Region extends BaseEntity {
 
     public Region() {} // default constructor for JPA

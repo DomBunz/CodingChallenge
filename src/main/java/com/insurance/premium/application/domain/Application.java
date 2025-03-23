@@ -14,10 +14,12 @@ import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "applications")
+@SuppressWarnings("java:S2160") // equals and hashCode are in BaseEntity
 public class Application extends BaseEntity {
 
     public Application() {} // default constructor for JPA
 
+    @SuppressWarnings("java:S107") // number of parameters
     public Application(Integer annualMileage, String vehicleType, String postalCode, BigDecimal basePremium,
             BigDecimal mileageFactor, BigDecimal vehicleFactor, BigDecimal regionFactor, BigDecimal calculatedPremium,
             LocalDateTime createdAt, Status status) {

@@ -72,7 +72,7 @@ class ConfigurationServiceTest {
     @Test
     void getConfigValue_WithExistingConfig_ReturnsValue() {
         // Arrange
-        String configKey = "TEST_KEY";
+        String configKey = "BASE_PREMIUM";
         String configValue = "test_value";
         String defaultValue = "default_value";
         
@@ -93,7 +93,7 @@ class ConfigurationServiceTest {
     @Test
     void getConfigValue_WithNoConfig_ReturnsDefaultValue() {
         // Arrange
-        String configKey = "NON_EXISTENT_KEY";
+        String configKey = "BASE_PREMIUM";
         String defaultValue = "default_value";
         
         when(configurationRepository.findByKey(configKey)).thenReturn(Optional.empty());
@@ -109,7 +109,7 @@ class ConfigurationServiceTest {
     @Test
     void updateConfiguration_WithNewConfig_CreatesNewEntity() {
         // Arrange
-        String configKey = "NEW_KEY";
+        String configKey = "BASE_PREMIUM";
         String configValue = "new_value";
         String description = "Test description";
         
@@ -139,7 +139,7 @@ class ConfigurationServiceTest {
     @Test
     void updateConfiguration_WithExistingConfig_UpdatesEntity() {
         // Arrange
-        String configKey = "EXISTING_KEY";
+        String configKey = "BASE_PREMIUM";
         String oldValue = "old_value";
         String newValue = "new_value";
         String description = "Test description";
