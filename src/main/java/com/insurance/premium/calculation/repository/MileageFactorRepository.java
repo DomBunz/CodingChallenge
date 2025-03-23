@@ -14,13 +14,26 @@ import com.insurance.premium.calculation.domain.MileageFactor;
 public interface MileageFactorRepository extends JpaRepository<MileageFactor, Long> {
     
     /**
-     * Find the mileage factor for a given annual mileage
+     * Find the mileage factor for a given annual mileage. There are currently
+     * no checks to ensure that mileage ranges do not overlap, so this might
+     * return multiple values.
      * 
      * @param mileage The annual mileage
      * @return The mileage factor that applies to the given mileage
      */
     @Query("SELECT mf FROM MileageFactor mf WHERE mf.minMileage <= :mileage AND (mf.maxMileage IS NULL OR mf.maxMileage >= :mileage) ORDER BY mf.minMileage DESC")
-    Optional<MileageFactor> findByMileage(@Param("mileage") int mileage);
+    List<MileageFactor> findAllByMileage(@Param("mileage") int mileage);
+    
+    /**
+     * Find the mileage factor for a given annual mileage
+     * 
+     * @param mileage The annual mileage
+     * @return The mileage factor that applies to the given mileage
+     */
+    default Optional<MileageFactor> findByMileage(int mileage) {
+        List<MileageFactor> factors = findAllByMileage(mileage);
+        return factors.isEmpty() ? Optional.empty() : Optional.of(factors.get(0));
+    }
     
     /**
      * Find all mileage factors ordered by min mileage
