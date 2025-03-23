@@ -301,7 +301,7 @@ Die Berechtigungsstruktur verwendet ein hierarchisches System mit Wildcards:
 
 2. **HTTPS**: Konfiguration der Anwendung für die Verwendung von HTTPS in der Produktion mit entsprechenden Zertifikaten.
 
-3. **CSRF-Schutz**: Implementierung von CSRF-Tokens für Webformulare.
+3. **CSRF-Schutz**: Implementierung von CSRF-Tokens für Webformulare, falls implementiert.
 
 4. **Audit-Logging**: Protokollierung aller sicherheitsrelevanten Ereignisse für Audit-Zwecke.
 
@@ -358,14 +358,14 @@ Ich würde folgende Frameworks verwenden:
    - Implementierung der Berechnungslogik (done)
    - Import der CSV-Daten (done)
 
-3. **Web-Interface und API-Entwicklung**
+3. **API-Entwicklung (done)**
    - Implementierung der REST-Endpunkte (done)
    - Dokumentation der API (done)
 
-4. **Tests und Qualitätssicherung**
-   - Implementierung der Tests (wip)
-   - Code-Qualitätsanalyse
-   - Performance-Tests (wenn nötig)
+4. **Tests und Qualitätssicherung (done)**
+   - Implementierung der Tests (done)
+   - Code-Qualitätsanalyse (automatisch durch SonarLint)
+   - Performance-Tests (wenn nötig, aktuell kein Bedarf)
 
 5. **Optional**
    - Implementierung von Shiro

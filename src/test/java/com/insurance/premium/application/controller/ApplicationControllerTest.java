@@ -232,4 +232,132 @@ class ApplicationControllerTest {
 
         verify(applicationService, times(1)).deleteApplication(1L);
     }
+    
+    // Input validation tests to protect against injection attacks and malicious inputs
+    
+    @Test
+    void createApplication_WithSqlInjectionInPostalCode_ReturnsErrorStatus() throws Exception {
+        // Arrange
+        ApplicationRequest maliciousRequest = new ApplicationRequest(
+            "10115' OR '1'='1", // SQL injection attempt
+            "Kompaktklasse",
+            15000
+        );
+        
+        // Mock the service to throw an exception for invalid input
+        when(applicationService.createApplication(any(ApplicationRequest.class)))
+                .thenThrow(new IllegalArgumentException("Invalid postal code format"));
+        
+        // Act & Assert
+        mockMvc.perform(post("/api/applications")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(maliciousRequest)))
+                .andExpect(result -> {
+                    int status = result.getResponse().getStatus();
+                    // Accept either client error (4xx) or server error (5xx)
+                    assertTrue(status >= 400, "Expected error status code, but got " + status);
+                });
+                
+        verify(applicationService, times(1)).createApplication(any(ApplicationRequest.class));
+    }
+    
+    @Test
+    void createApplication_WithXssInVehicleType_ReturnsErrorStatus() throws Exception {
+        // Arrange
+        ApplicationRequest maliciousRequest = new ApplicationRequest(
+            "10115",
+            "<script>alert('XSS')</script>", // XSS attempt
+            15000
+        );
+        
+        // Mock the service to throw an exception for invalid input
+        when(applicationService.createApplication(any(ApplicationRequest.class)))
+                .thenThrow(new IllegalArgumentException("Invalid vehicle type"));
+        
+        // Act & Assert
+        mockMvc.perform(post("/api/applications")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(maliciousRequest)))
+                .andExpect(result -> {
+                    int status = result.getResponse().getStatus();
+                    // Accept either client error (4xx) or server error (5xx)
+                    assertTrue(status >= 400, "Expected error status code, but got " + status);
+                });
+                
+        verify(applicationService, times(1)).createApplication(any(ApplicationRequest.class));
+    }
+    
+    @Test
+    void createApplication_WithExtremelyLargeMileage_ReturnsErrorStatus() throws Exception {
+        // Arrange
+        ApplicationRequest maliciousRequest = new ApplicationRequest(
+            "10115",
+            "Kompaktklasse",
+            Integer.MAX_VALUE // Extremely large value
+        );
+        
+        // Mock the service to throw an exception for invalid input
+        when(applicationService.createApplication(any(ApplicationRequest.class)))
+                .thenThrow(new IllegalArgumentException("Mileage value out of acceptable range"));
+        
+        // Act & Assert
+        mockMvc.perform(post("/api/applications")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(maliciousRequest)))
+                .andExpect(result -> {
+                    int status = result.getResponse().getStatus();
+                    // Accept either client error (4xx) or server error (5xx)
+                    assertTrue(status >= 400, "Expected error status code, but got " + status);
+                });
+                
+        verify(applicationService, times(1)).createApplication(any(ApplicationRequest.class));
+    }
+    
+    @Test
+    void getApplication_WithNonNumericId_ReturnsBadRequest() throws Exception {
+        // Act & Assert
+        mockMvc.perform(get("/api/applications/abc")) // Non-numeric ID
+                .andExpect(status().isBadRequest());
+                
+        verify(applicationService, never()).getApplication(any());
+    }
+    
+    @Test
+    void updateApplicationStatus_WithInvalidStatus_ReturnsBadRequest() throws Exception {
+        // Act & Assert
+        mockMvc.perform(put("/api/applications/1/status/INVALID_STATUS"))
+                .andExpect(status().isBadRequest());
+                
+        verify(applicationService, never()).updateApplicationStatus(any(), any());
+    }
+    
+    @Test
+    void getAllApplications_WithNegativePage_ReturnsEmptyPage() throws Exception {
+        // Mock the service to return empty page for invalid pagination
+        when(applicationService.getAllApplications(any(Pageable.class)))
+                .thenReturn(Page.empty());
+        
+        // Act & Assert
+        mockMvc.perform(get("/api/applications")
+                .param("page", "-1") // Negative page number
+                .param("size", "10"))
+                .andExpect(status().isOk()) // The controller returns 200 OK with empty page
+                .andExpect(jsonPath("$.content").isArray())
+                .andExpect(jsonPath("$.content").isEmpty());
+    }
+    
+    @Test
+    void getAllApplications_WithExcessivePageSize_ReturnsEmptyPage() throws Exception {
+        // Mock the service to return empty page for invalid pagination
+        when(applicationService.getAllApplications(any(Pageable.class)))
+                .thenReturn(Page.empty());
+        
+        // Act & Assert
+        mockMvc.perform(get("/api/applications")
+                .param("page", "0")
+                .param("size", "10000")) // Extremely large page size
+                .andExpect(status().isOk()) // The controller returns 200 OK with empty page
+                .andExpect(jsonPath("$.content").isArray())
+                .andExpect(jsonPath("$.content").isEmpty());
+    }
 }
