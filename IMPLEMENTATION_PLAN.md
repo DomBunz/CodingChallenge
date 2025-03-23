@@ -200,14 +200,17 @@ Die Migrationsskripte werden im Ressourcenverzeichnis `src/main/resources/db/mig
 
 #### REST-API
 
-- `GET /api/factors` - Liefert alle verfügbaren Faktoren
-- `GET /api/factors/region` - Liefert alle verfügbaren Region-Faktoren
-- `GET /api/factors/vehicle` - Liefert alle verfügbaren Fahrzeugtyp-Faktor
-- `GET /api/zip` - Liefert alle Postleitzahlen
-- `POST /api/calculate` - Berechnet die Prämie basierend auf den Eingabeparametern
-- `POST /api/claim` - Erstellt einen neuen Antrag
-- `GET /api/claim/{id}` - Ruft einen bestimmten Antrag ab
-- `GET /api/claim` - Ruft alle Anträge ab (mit Paginierung und Filterung)
+- `GET /api/premium/factors` - Liefert alle verfügbaren Faktoren
+- `GET /api/premium/factors/region` - Liefert alle verfügbaren Region-Faktoren
+- `GET /api/premium/factors/vehicle` - Liefert alle verfügbaren Fahrzeugtyp-Faktoren
+- `GET /api/premium/postcodes` - Liefert alle Postleitzahlen
+- `POST /api/premium/calculate` - Berechnet die Prämie basierend auf den Eingabeparametern
+- `POST /api/applications` - Erstellt einen neuen Antrag
+- `GET /api/applications/{id}` - Ruft einen bestimmten Antrag ab
+- `GET /api/applications` - Ruft alle Anträge ab (mit Paginierung)
+- `GET /api/applications/status/{status}` - Ruft alle Anträge mit einem bestimmten Status ab (mit Paginierung)
+- `PUT /api/applications/{id}/status/{status}` - Aktualisiert den Status eines Antrags
+- `DELETE /api/applications/{id}` - Löscht einen Antrag
 
 ## Sicherheitsimplementierung (optional)
 
