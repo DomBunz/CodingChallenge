@@ -49,9 +49,24 @@ TODO
 
 ## API-Dokumentation
 
-Die Anwendung stellt folgende REST-APIs zur Verfügung:
+Die API ist mit Swagger/OpenAPI dokumentiert. Nach dem Start der Anwendung können Sie die API-Dokumentation unter folgenden URLs aufrufen:
 
-### Premium Calculation API
+- Swagger UI: [http://localhost:8080/swagger-ui.html](http://localhost:8080/swagger-ui.html)
+- OpenAPI JSON: [http://localhost:8080/v3/api-docs](http://localhost:8080/v3/api-docs)
+
+Die API ist in zwei Gruppen unterteilt:
+
+1. **Premium Calculation API** - Endpunkte für die Prämienberechnung und zugehörige Daten
+   - URL: [http://localhost:8080/v3/api-docs/premium-calculation](http://localhost:8080/v3/api-docs/premium-calculation)
+   
+2. **Application Management API** - Endpunkte für die Verwaltung von Versicherungsanträgen
+   - URL: [http://localhost:8080/v3/api-docs/application-management](http://localhost:8080/v3/api-docs/application-management)
+
+### REST API
+
+Die Anwendung bietet folgende REST-Endpunkte:
+
+#### Premium Calculation API
 
 | Methode | Endpunkt | Beschreibung |
 |---------|----------|--------------|
@@ -63,7 +78,7 @@ Die Anwendung stellt folgende REST-APIs zur Verfügung:
 | GET | `/api/premium/postcodes` | Liefert alle Postleitzahlen mit zugehörigen Bundesländern und Städten (unterstützt Paginierung) |
 | GET | `/api/premium/postcodes/search/{prefix}` | Sucht nach Postleitzahlen, die mit einem bestimmten Präfix beginnen |
 
-### Application API
+#### Application API
 
 | Methode | Endpunkt | Beschreibung |
 |---------|----------|--------------|

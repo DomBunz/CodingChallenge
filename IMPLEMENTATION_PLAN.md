@@ -359,15 +359,17 @@ Ich würde folgende Frameworks verwenden:
    - Import der CSV-Daten (done)
 
 3. **Web-Interface und API-Entwicklung**
-   - Implementierung der REST-Endpunkte
-   - Implementierung der Thymeleaf-Templates
-   - Implementierung der Controller
-   - Dokumentation der API
+   - Implementierung der REST-Endpunkte (done)
+   - Dokumentation der API (done)
 
 4. **Tests und Qualitätssicherung**
    - Implementierung der Tests (wip)
    - Code-Qualitätsanalyse
    - Performance-Tests (wenn nötig)
+
+5. **Optional**
+   - Implementierung von Shiro
+   - Implementierung der Thymeleaf-Templates
 
 ## Mögliche zukünftige Erweiterungen
 
