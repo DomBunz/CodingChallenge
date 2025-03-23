@@ -38,7 +38,7 @@ class ApplicationServiceTest {
     void createApplication_ShouldCreateAndSaveApplication() {
         // Arrange
         String postalCode = "10115";
-        String vehicleType = "PKW";
+        String vehicleType = "Kompaktklasse";
         int annualMileage = 15000;
         
         ApplicationRequest request = new ApplicationRequest(postalCode, vehicleType, annualMileage);

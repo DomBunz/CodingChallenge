@@ -38,10 +38,10 @@ class ApplicationRepositoryTest {
     @Test
     void findByStatus_ShouldReturnApplicationsWithMatchingStatus() {
         // Arrange
-        Application app1 = createApplication("10115", "PKW", Status.NEW);
-        Application app2 = createApplication("10117", "PKW", Status.NEW);
-        Application app3 = createApplication("20095", "LKW", Status.ACCEPTED);
-        Application app4 = createApplication("30159", "Motorrad", Status.REJECTED);
+        Application app1 = createApplication("10115", "Kompaktklasse", Status.NEW);
+        Application app2 = createApplication("10117", "Kompaktklasse", Status.NEW);
+        Application app3 = createApplication("20095", "Van", Status.ACCEPTED);
+        Application app4 = createApplication("30159", "Elektroauto", Status.REJECTED);
         
         applicationRepository.saveAll(List.of(app1, app2, app3, app4));
         
@@ -70,7 +70,7 @@ class ApplicationRepositoryTest {
         for (int i = 0; i < 25; i++) {
             Application app = createApplication(
                 String.format("%05d", 10000 + i), 
-                "PKW", 
+                "Kompaktklasse", 
                 Status.NEW
             );
             applicationRepository.save(app);
@@ -104,9 +104,9 @@ class ApplicationRepositoryTest {
     @Test
     void findByPostalCode_ShouldReturnApplicationsWithMatchingPostalCode() {
         // Arrange
-        Application app1 = createApplication("10115", "PKW", Status.NEW);
-        Application app2 = createApplication("10115", "LKW", Status.ACCEPTED);
-        Application app3 = createApplication("20095", "PKW", Status.NEW);
+        Application app1 = createApplication("10115", "Kompaktklasse", Status.NEW);
+        Application app2 = createApplication("10115", "Van", Status.ACCEPTED);
+        Application app3 = createApplication("20095", "Kompaktklasse", Status.NEW);
         
         applicationRepository.saveAll(List.of(app1, app2, app3));
         
@@ -116,20 +116,20 @@ class ApplicationRepositoryTest {
         // Assert
         assertThat(foundApplications).hasSize(2);
         assertThat(foundApplications).extracting(Application::getVehicleType)
-            .containsExactlyInAnyOrder("PKW", "LKW");
+            .containsExactlyInAnyOrder("Kompaktklasse", "Van");
     }
     
     @Test
     void findByVehicleType_ShouldReturnApplicationsWithMatchingVehicleType() {
         // Arrange
-        Application app1 = createApplication("10115", "PKW", Status.NEW);
-        Application app2 = createApplication("20095", "PKW", Status.ACCEPTED);
-        Application app3 = createApplication("30159", "LKW", Status.REJECTED);
+        Application app1 = createApplication("10115", "Kompaktklasse", Status.NEW);
+        Application app2 = createApplication("20095", "Kompaktklasse", Status.ACCEPTED);
+        Application app3 = createApplication("30159", "Van", Status.REJECTED);
         
         applicationRepository.saveAll(List.of(app1, app2, app3));
         
         // Act
-        List<Application> foundApplications = applicationRepository.findByVehicleType("PKW");
+        List<Application> foundApplications = applicationRepository.findByVehicleType("Kompaktklasse");
         
         // Assert
         assertThat(foundApplications).hasSize(2);
@@ -144,10 +144,10 @@ class ApplicationRepositoryTest {
         LocalDateTime twoDaysAgo = now.minusDays(2);
         LocalDateTime threeDaysAgo = now.minusDays(3);
         
-        Application app1 = createApplicationWithDate("10115", "PKW", Status.NEW, now);
-        Application app2 = createApplicationWithDate("20095", "LKW", Status.ACCEPTED, yesterday);
-        Application app3 = createApplicationWithDate("30159", "Motorrad", Status.REJECTED, twoDaysAgo);
-        Application app4 = createApplicationWithDate("40210", "PKW", Status.NEW, threeDaysAgo);
+        Application app1 = createApplicationWithDate("10115", "Kompaktklasse", Status.NEW, now);
+        Application app2 = createApplicationWithDate("20095", "Sportwage", Status.ACCEPTED, yesterday);
+        Application app3 = createApplicationWithDate("30159", "Van", Status.REJECTED, twoDaysAgo);
+        Application app4 = createApplicationWithDate("40210", "Kompaktklasse", Status.NEW, threeDaysAgo);
         
         applicationRepository.saveAll(List.of(app1, app2, app3, app4));
         
@@ -163,7 +163,7 @@ class ApplicationRepositoryTest {
     @Test
     void save_ShouldPersistApplication() {
         // Arrange
-        Application application = createApplication("10115", "PKW", Status.NEW);
+        Application application = createApplication("10115", "Kompaktklasse", Status.NEW);
         
         // Act
         Application savedApplication = applicationRepository.save(application);
@@ -175,14 +175,14 @@ class ApplicationRepositoryTest {
         Application retrievedApplication = applicationRepository.findById(savedApplication.getId()).orElse(null);
         assertThat(retrievedApplication).isNotNull();
         assertThat(retrievedApplication.getPostalCode()).isEqualTo("10115");
-        assertThat(retrievedApplication.getVehicleType()).isEqualTo("PKW");
+        assertThat(retrievedApplication.getVehicleType()).isEqualTo("Kompaktklasse");
         assertThat(retrievedApplication.getStatus()).isEqualTo(Status.NEW);
     }
     
     @Test
     void delete_ShouldRemoveApplication() {
         // Arrange
-        Application application = createApplication("10115", "PKW", Status.NEW);
+        Application application = createApplication("10115", "Kompaktklasse", Status.NEW);
         Application savedApplication = applicationRepository.save(application);
         
         // Act

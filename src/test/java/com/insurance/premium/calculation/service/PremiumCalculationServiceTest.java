@@ -44,7 +44,7 @@ class PremiumCalculationServiceTest {
     private PremiumCalculationService calculationService;
     
     private static final String POSTAL_CODE = "10115";
-    private static final String VEHICLE_TYPE = "PKW";
+    private static final String VEHICLE_TYPE = "Kompaktklasse";
     private static final int ANNUAL_MILEAGE = 15000;
     private static final BigDecimal REGION_FACTOR_VALUE = new BigDecimal("1.2");
     private static final BigDecimal VEHICLE_FACTOR_VALUE = new BigDecimal("1.0");
