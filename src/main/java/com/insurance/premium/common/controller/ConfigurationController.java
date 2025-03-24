@@ -27,8 +27,8 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 
 @RestController
-@RequestMapping("/api/configurations")
-@Tag(name = "System Configurations", description = "API for managing system configurations")
+@RequestMapping("/api/admin/configurations")
+@Tag(name = "System Administration", description = "API for managing system configurations (admin only)")
 public class ConfigurationController {
 
     private final ConfigurationService configurationService;

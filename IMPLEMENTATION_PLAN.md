@@ -207,16 +207,36 @@ Die Migrationsskripte werden im Ressourcenverzeichnis `src/main/resources/db/mig
 - `GET /api/premium/postcodes` - Liefert alle Postleitzahlen (mit Paginierung)
 - `GET /api/premium/postcodes/search/{prefix}` - Sucht Postleitzahlen, die mit dem angegebenen Präfix beginnen
 - `POST /api/premium/calculate` - Berechnet die Prämie basierend auf den Eingabeparametern
+
 - `POST /api/applications` - Erstellt einen neuen Antrag
 - `GET /api/applications/{id}` - Ruft einen bestimmten Antrag ab
 - `GET /api/applications` - Ruft alle Anträge ab (mit Paginierung)
 - `GET /api/applications/status/{status}` - Ruft alle Anträge mit einem bestimmten Status ab (mit Paginierung)
 - `PUT /api/applications/{id}/status/{status}` - Aktualisiert den Status eines Antrags
 - `DELETE /api/applications/{id}` - Löscht einen Antrag
-- `GET /api/configurations` - Liefert alle Systemkonfigurationen
-- `GET /api/configurations/{key}` - Liefert eine bestimmte Systemkonfiguration anhand des Schlüssels
-- `POST /api/configurations` - Erstellt eine neue Systemkonfiguration
-- `PUT /api/configurations/{key}` - Aktualisiert eine bestehende Systemkonfiguration
+
+- `GET /api/admin/configurations` - Liefert alle Systemkonfigurationen
+- `GET /api/admin/configurations/{key}` - Liefert eine bestimmte Systemkonfiguration anhand des Schlüssels
+- `POST /api/admin/configurations` - Erstellt eine neue Systemkonfiguration
+- `PUT /api/admin/configurations/{key}` - Aktualisiert eine bestehende Systemkonfiguration
+
+- `GET /api/admin/premium/management/regions` - Liefert alle Region-Faktoren
+- `GET /api/admin/premium/management/regions/{id}` - Liefert einen bestimmten Region-Faktor
+- `POST /api/admin/premium/management/regions` - Erstellt einen neuen Region-Faktor
+- `PUT /api/admin/premium/management/regions/{id}` - Aktualisiert einen bestehenden Region-Faktor
+- `DELETE /api/admin/premium/management/regions/{id}` - Löscht einen Region-Faktor
+
+- `GET /api/admin/premium/management/vehicles` - Liefert alle Fahrzeugtypen
+- `GET /api/admin/premium/management/vehicles/{id}` - Liefert einen bestimmten Fahrzeugtyp
+- `POST /api/admin/premium/management/vehicles` - Erstellt einen neuen Fahrzeugtyp
+- `PUT /api/admin/premium/management/vehicles/{id}` - Aktualisiert einen bestehenden Fahrzeugtyp
+- `DELETE /api/admin/premium/management/vehicles/{id}` - Löscht einen Fahrzeugtyp
+
+- `GET /api/admin/premium/management/mileages` - Liefert alle Kilometerleistungs-Faktoren
+- `GET /api/admin/premium/management/mileages/{id}` - Liefert einen bestimmten Kilometerleistungs-Faktor
+- `POST /api/admin/premium/management/mileages` - Erstellt einen neuen Kilometerleistungs-Faktor
+- `PUT /api/admin/premium/management/mileages/{id}` - Aktualisiert einen bestehenden Kilometerleistungs-Faktor
+- `DELETE /api/admin/premium/management/mileages/{id}` - Löscht einen Kilometerleistungs-Faktor
 
 ## Sicherheitsimplementierung (optional)
 

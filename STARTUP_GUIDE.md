@@ -54,7 +54,7 @@ Die API ist mit Swagger/OpenAPI dokumentiert. Nach dem Start der Anwendung könn
 - Swagger UI: [http://localhost:8080/swagger-ui.html](http://localhost:8080/swagger-ui.html)
 - OpenAPI JSON: [http://localhost:8080/v3/api-docs](http://localhost:8080/v3/api-docs)
 
-Die API ist in zwei Gruppen unterteilt:
+Die API ist in drei Gruppen unterteilt:
 
 1. **Premium Calculation API** - Endpunkte für die Prämienberechnung und zugehörige Daten
    - URL: [http://localhost:8080/v3/api-docs/premium-calculation](http://localhost:8080/v3/api-docs/premium-calculation)
@@ -62,9 +62,12 @@ Die API ist in zwei Gruppen unterteilt:
 2. **Application Management API** - Endpunkte für die Verwaltung von Versicherungsanträgen
    - URL: [http://localhost:8080/v3/api-docs/application-management](http://localhost:8080/v3/api-docs/application-management)
 
+3. **Factor Management API** - Endpunkte für die Verwaltung von Faktoren (nur für Administratoren)
+   - URL: [http://localhost:8080/v3/api-docs/factor-management](http://localhost:8080/v3/api-docs/factor-management)
+
 ### REST API
 
-Die Anwendung bietet folgende REST-Endpunkte:
+Die Anwendung bietet (unter anderem) folgende REST-Endpunkte:
 
 #### Premium Calculation API
 

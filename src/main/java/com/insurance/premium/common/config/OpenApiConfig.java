@@ -48,10 +48,18 @@ public class OpenApiConfig {
     }
 
     @Bean
+    public GroupedOpenApi factorApi() {
+        return GroupedOpenApi.builder()
+                .group("factor-administration")
+                .pathsToMatch("/api/admin/premium/management/**")
+                .build();
+    }
+
+    @Bean
     public GroupedOpenApi configurationApi() {
         return GroupedOpenApi.builder()
                 .group("configuration-administration")
-                .pathsToMatch("/api/configurations/**")
+                .pathsToMatch("/api/admin/configurations/**")
                 .build();
     }
 }
