@@ -18,6 +18,11 @@ import com.insurance.premium.common.dto.ConfigurationResponse;
 import com.insurance.premium.common.service.ConfigurationService;
 
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 
@@ -34,6 +39,10 @@ public class ConfigurationController {
 
     @GetMapping
     @Operation(summary = "Get all configurations", description = "Returns a list of all system configurations")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = "List of configurations retrieved successfully", 
+                content = @Content(schema = @Schema(implementation = ConfigurationResponse.class)))
+    })
     public ResponseEntity<List<ConfigurationResponse>> getAllConfigurations() {
         List<ConfigurationResponse> configurations = configurationService.getAllConfigurations().stream()
                 .map(this::mapToResponse)
@@ -43,7 +52,14 @@ public class ConfigurationController {
 
     @GetMapping("/{key}")
     @Operation(summary = "Get configuration by key", description = "Returns a specific configuration by its key")
-    public ResponseEntity<ConfigurationResponse> getConfigurationByKey(@PathVariable String key) {
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = "Configuration retrieved successfully", 
+                content = @Content(schema = @Schema(implementation = ConfigurationResponse.class))),
+        @ApiResponse(responseCode = "400", description = "Invalid configuration key"),
+        @ApiResponse(responseCode = "404", description = "Configuration not found")
+    })
+    public ResponseEntity<ConfigurationResponse> getConfigurationByKey(
+            @Parameter(description = "Configuration key", required = true) @PathVariable String key) {
         if (!configurationService.isKeyAllowed(key)) {
             return ResponseEntity.badRequest().build();
         }
@@ -55,7 +71,14 @@ public class ConfigurationController {
 
     @PostMapping
     @Operation(summary = "Create configuration", description = "Creates a new system configuration")
-    public ResponseEntity<ConfigurationResponse> createConfiguration(@Valid @RequestBody ConfigurationRequest request) {
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "201", description = "Configuration created successfully", 
+                content = @Content(schema = @Schema(implementation = ConfigurationResponse.class))),
+        @ApiResponse(responseCode = "400", description = "Invalid configuration data or key not allowed")
+    })
+    public ResponseEntity<ConfigurationResponse> createConfiguration(
+            @Parameter(description = "Configuration data", required = true) 
+            @Valid @RequestBody ConfigurationRequest request) {
         try {
             SystemConfiguration config = configurationService.updateConfiguration(
                     request.key(), request.value(), request.description());
@@ -67,8 +90,14 @@ public class ConfigurationController {
 
     @PutMapping("/{key}")
     @Operation(summary = "Update configuration", description = "Updates an existing system configuration")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = "Configuration updated successfully", 
+                content = @Content(schema = @Schema(implementation = ConfigurationResponse.class))),
+        @ApiResponse(responseCode = "400", description = "Invalid configuration data, key mismatch, or key not allowed")
+    })
     public ResponseEntity<ConfigurationResponse> updateConfiguration(
-            @PathVariable String key, 
+            @Parameter(description = "Configuration key", required = true) @PathVariable String key, 
+            @Parameter(description = "Updated configuration data", required = true) 
             @Valid @RequestBody ConfigurationRequest request) {
         
         // Ensure the key in the path matches the key in the request

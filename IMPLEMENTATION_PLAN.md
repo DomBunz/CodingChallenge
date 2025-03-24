@@ -84,7 +84,7 @@ Diese Technologiewahl bietet einen einfacheren Ansatz als ein komplexes Frontend
 
 #### Entitäten
 
-1. ** Regionsfaktor **
+1. **Regionsfaktor**
    - ID
    - Bundesland
    - Faktor
@@ -200,10 +200,12 @@ Die Migrationsskripte werden im Ressourcenverzeichnis `src/main/resources/db/mig
 
 #### REST-API
 
-- `GET /api/premium/factors` - Liefert alle verfügbaren Faktoren
+- `GET /api/premium/factors` - Liefert alle verfügbaren Faktoren (Region, Fahrzeugtyp, Kilometerleistung)
 - `GET /api/premium/factors/region` - Liefert alle verfügbaren Region-Faktoren
 - `GET /api/premium/factors/vehicle` - Liefert alle verfügbaren Fahrzeugtyp-Faktoren
-- `GET /api/premium/postcodes` - Liefert alle Postleitzahlen
+- `GET /api/premium/factors/mileage` - Liefert alle verfügbaren Kilometerleistungs-Faktoren
+- `GET /api/premium/postcodes` - Liefert alle Postleitzahlen (mit Paginierung)
+- `GET /api/premium/postcodes/search/{prefix}` - Sucht Postleitzahlen, die mit dem angegebenen Präfix beginnen
 - `POST /api/premium/calculate` - Berechnet die Prämie basierend auf den Eingabeparametern
 - `POST /api/applications` - Erstellt einen neuen Antrag
 - `GET /api/applications/{id}` - Ruft einen bestimmten Antrag ab
@@ -211,6 +213,10 @@ Die Migrationsskripte werden im Ressourcenverzeichnis `src/main/resources/db/mig
 - `GET /api/applications/status/{status}` - Ruft alle Anträge mit einem bestimmten Status ab (mit Paginierung)
 - `PUT /api/applications/{id}/status/{status}` - Aktualisiert den Status eines Antrags
 - `DELETE /api/applications/{id}` - Löscht einen Antrag
+- `GET /api/configurations` - Liefert alle Systemkonfigurationen
+- `GET /api/configurations/{key}` - Liefert eine bestimmte Systemkonfiguration anhand des Schlüssels
+- `POST /api/configurations` - Erstellt eine neue Systemkonfiguration
+- `PUT /api/configurations/{key}` - Aktualisiert eine bestehende Systemkonfiguration
 
 ## Sicherheitsimplementierung (optional)
 
