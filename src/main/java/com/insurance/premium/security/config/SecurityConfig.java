@@ -15,7 +15,10 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.www.BasicAuthenticationFilter;
 import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
+
+import com.insurance.premium.security.filter.SecurityAuditLogFilter;
 
 /**
  * Spring Security configuration.
@@ -26,9 +29,11 @@ import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 public class SecurityConfig {
     
     private final UserDetailsService userDetailsService;
+    private final SecurityAuditLogFilter securityAuditLogFilter;
     
-    public SecurityConfig(UserDetailsService userDetailsService) {
+    public SecurityConfig(UserDetailsService userDetailsService, SecurityAuditLogFilter securityAuditLogFilter) {
         this.userDetailsService = userDetailsService;
+        this.securityAuditLogFilter = securityAuditLogFilter;
     }
     
     @Bean
@@ -89,7 +94,8 @@ public class SecurityConfig {
             .httpBasic(httpBasic -> {})
             .headers(headers -> headers
                 .frameOptions(FrameOptionsConfig::sameOrigin)
-            );
+            )
+            .addFilterAfter(securityAuditLogFilter, BasicAuthenticationFilter.class);
         
         return http.build();
     }
