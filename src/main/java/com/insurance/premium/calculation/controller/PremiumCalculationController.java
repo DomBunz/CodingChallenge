@@ -74,15 +74,15 @@ public class PremiumCalculationController {
             @Parameter(description = "Premium calculation request with postal code, vehicle type, and annual mileage", required = true)
             @Valid @RequestBody PremiumCalculationRequest request) {
         try {
-            logger.info("Calculating premium for request: {}", request);
+            logger.debug("REST request to calculate premium: {}", request);
             PremiumCalculationResult result = calculationService.calculatePremium(request);
-            logger.info("Premium calculation result: {}", result);
+            logger.debug("Premium calculation completed successfully");
             return ResponseEntity.ok(result);
         } catch (IllegalArgumentException e) {
-            logger.error("Error calculating premium: {}", e.getMessage());
+            logger.warn("Invalid premium calculation request: {}", e.getMessage());
             return ResponseEntity.badRequest().body(ErrorResponse.validation(e.getMessage()));
         } catch (Exception e) {
-            logger.error("Unexpected error calculating premium", e);
+            logger.error("Error calculating premium", e);
             return ResponseEntity.internalServerError().body(ErrorResponse.serverError("An unexpected error occurred"));
         }
     }
@@ -94,24 +94,28 @@ public class PremiumCalculationController {
         factors.put("regionFactors", getAllRegionFactors());
         factors.put("vehicleTypeFactors", getAllVehicleFactors());
         factors.put("mileageFactors", getAllMileageFactors());
+        logger.debug("Returning all factors for premium calculation");
         return ResponseEntity.ok(factors);
     }
     
     @GetMapping("/factors/region")
     @Operation(summary = "Get region factors", description = "Returns all available region factors for premium calculation")
     public ResponseEntity<List<FactorResponse>> getRegionFactors() {
+        logger.debug("Returning region factors for premium calculation");
         return ResponseEntity.ok(getAllRegionFactors());
     }
     
     @GetMapping("/factors/vehicle")
     @Operation(summary = "Get vehicle type factors", description = "Returns all available vehicle type factors for premium calculation")
     public ResponseEntity<List<FactorResponse>> getVehicleFactors() {
+        logger.debug("Returning vehicle type factors for premium calculation");
         return ResponseEntity.ok(getAllVehicleFactors());
     }
     
     @GetMapping("/factors/mileage")
     @Operation(summary = "Get mileage factors", description = "Returns all available mileage factors for premium calculation")
     public ResponseEntity<List<FactorResponse>> getMileageFactors() {
+        logger.debug("Returning mileage factors for premium calculation");
         return ResponseEntity.ok(getAllMileageFactors());
     }
     
@@ -121,6 +125,7 @@ public class PremiumCalculationController {
     public ResponseEntity<Page<PostcodeResponse>> getPostcodes(
             @Parameter(description = "Pagination parameters (page, size, sort)", hidden = true)
             Pageable pageable) {
+        logger.debug("Returning all postcodes with pagination support");
         Page<PostcodeResponse> postcodes = regionRepository.findAll(pageable)
                 .map(PostcodeResponse::fromRegion);
         
@@ -132,6 +137,7 @@ public class PremiumCalculationController {
     public ResponseEntity<List<PostcodeResponse>> getPostcodesByPrefix(
             @Parameter(description = "Postal code prefix to search for", required = true)
             @PathVariable String prefix) {
+        logger.debug("Searching postcodes by prefix: {}", prefix);
         List<PostcodeResponse> postcodes = regionRepository.findByPostalCodeStartingWith(prefix).stream()
                 .map(PostcodeResponse::fromRegion)
                 .toList();
@@ -140,6 +146,7 @@ public class PremiumCalculationController {
     }
     
     private List<FactorResponse> getAllRegionFactors() {
+        logger.debug("Returning all region factors for premium calculation");
         // Get unique region factors
         return regionRepository.findAll().stream()
                 .map(Region::getRegionFactor)
@@ -149,12 +156,14 @@ public class PremiumCalculationController {
     }
     
     private List<FactorResponse> getAllVehicleFactors() {
+        logger.debug("Returning all vehicle type factors for premium calculation");
         return vehicleTypeRepository.findAll().stream()
                 .map(FactorResponse::fromVehicleType)
                 .toList();
     }
     
     private List<FactorResponse> getAllMileageFactors() {
+        logger.debug("Returning all mileage factors for premium calculation");
         return mileageFactorRepository.findAllByOrderByMinMileageAsc().stream()
                 .map(FactorResponse::fromMileageFactor)
                 .toList();

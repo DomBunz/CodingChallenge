@@ -383,7 +383,7 @@ Ich würde folgende Frameworks verwenden:
    - Performance-Tests (wenn nötig, aktuell kein Bedarf)
 
 5. **Optional**
-   - Implementierung von Spring Security
+   - Implementierung von Spring Security (done)
    - Implementierung der Thymeleaf-Templates
 
 ## Mögliche zukünftige Erweiterungen
