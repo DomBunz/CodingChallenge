@@ -64,10 +64,18 @@ public class OpenApiConfig {
     }
 
     @Bean
-    public GroupedOpenApi publicApi() {
+    public GroupedOpenApi userApi() {
         return GroupedOpenApi.builder()
                 .group("user-management")
                 .pathsToMatch("/api/admin/users/**")
+                .build();
+    }
+
+    @Bean
+    public GroupedOpenApi auditLogApi() {
+        return GroupedOpenApi.builder()
+                .group("audit-logging")
+                .pathsToMatch("/api/admin/audit-logs/**")
                 .build();
     }
 }
