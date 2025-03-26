@@ -65,6 +65,24 @@ Die API ist in drei Gruppen unterteilt:
 3. **Factor Management API** - Endpunkte für die Verwaltung von Faktoren (nur für Administratoren)
    - URL: [http://localhost:8080/v3/api-docs/factor-management](http://localhost:8080/v3/api-docs/factor-management)
 
+### Authentifizierung
+
+Die meisten API-Endpunkte erfordern eine Authentifizierung. Die Anwendung verwendet HTTP Basic Authentication. Folgende Benutzer sind standardmäßig verfügbar:
+
+| Benutzername | Passwort   | Rolle(n)   |
+|--------------|------------|------------|
+| admin        | admin      | ADMIN      |
+| agent        | agent      | AGENT      |
+| customer     | customer   | CUSTOMER   |
+| api_client   | api_client | API_CLIENT |
+
+Die Authentifizierung erfolgt über den HTTP-Header `Authorization` mit dem Wert `Basic <base64-encoded-credentials>`. Dabei ist `<base64-encoded-credentials>` die Base64-Kodierung von `username:password`.
+
+Beispiel für den Benutzer `admin` mit Passwort `admin`:
+```
+Authorization: Basic YWRtaW46YWRtaW4=
+```
+
 ### REST API
 
 Die Anwendung bietet (unter anderem) folgende REST-Endpunkte:
@@ -133,6 +151,7 @@ ACHTUNG: Gegebenenfalls muss `&` in der URL mittels `\` escaped werden.
 ```bash
 curl -X POST http://localhost:8080/api/premium/calculate \
   -H "Content-Type: application/json" \
+  -H "Authorization: Basic YWRtaW46YWRtaW4=" \
   -d '{
     "postalCode": "10115",
     "vehicleType": "Mittelklasse",
@@ -148,31 +167,45 @@ $body = @{
     annualMileage = 15000
 } | ConvertTo-Json
 
-Invoke-WebRequest -Uri "http://localhost:8080/api/premium/calculate" -Method POST -Body $body -ContentType "application/json"
+$headers = @{
+    "Authorization" = "Basic YWRtaW46YWRtaW4="
+}
+
+Invoke-WebRequest -Uri "http://localhost:8080/api/premium/calculate" -Method POST -Body $body -ContentType "application/json" -Headers $headers
 ```
 
 ### Faktoren abrufen
 
 **cURL:**
 ```bash
-curl -X GET http://localhost:8080/api/premium/factors
+curl -X GET http://localhost:8080/api/premium/factors \
+  -H "Authorization: Basic YWRtaW46YWRtaW4="
 ```
 
 **PowerShell (Invoke-WebRequest):**
 ```powershell
-Invoke-WebRequest -Uri "http://localhost:8080/api/premium/factors" -Method GET
+$headers = @{
+    "Authorization" = "Basic YWRtaW46YWRtaW4="
+}
+
+Invoke-WebRequest -Uri "http://localhost:8080/api/premium/factors" -Method GET -Headers $headers
 ```
 
 ### Fahrzeugtyp-Faktoren abrufen
 
 **cURL:**
 ```bash
-curl -X GET http://localhost:8080/api/premium/factors/vehicle
+curl -X GET http://localhost:8080/api/premium/factors/vehicle \
+  -H "Authorization: Basic YWRtaW46YWRtaW4="
 ```
 
 **PowerShell (Invoke-WebRequest):**
 ```powershell
-Invoke-WebRequest -Uri "http://localhost:8080/api/premium/factors/vehicle" -Method GET
+$headers = @{
+    "Authorization" = "Basic YWRtaW46YWRtaW4="
+}
+
+Invoke-WebRequest -Uri "http://localhost:8080/api/premium/factors/vehicle" -Method GET -Headers $headers
 ```
 
 ### Postleitzahlen abrufen
@@ -180,31 +213,42 @@ Invoke-WebRequest -Uri "http://localhost:8080/api/premium/factors/vehicle" -Meth
 **cURL:**
 ```bash
 # Alle Postleitzahlen (paginiert, Seite 1 mit 20 Einträgen)
-curl -X GET http://localhost:8080/api/premium/postcodes?page=1&size=20
+curl -X GET http://localhost:8080/api/premium/postcodes?page=1&size=20 \
+  -H "Authorization: Basic YWRtaW46YWRtaW4="
 
 # Alle Postleitzahlen (paginiert, Seite 2 mit 10 Einträgen, sortiert nach Postleitzahl)
-curl -X GET http://localhost:8080/api/premium/postcodes?page=2&size=10&sort=postalCode,asc
+curl -X GET http://localhost:8080/api/premium/postcodes?page=2&size=10&sort=postalCode,asc \
+  -H "Authorization: Basic YWRtaW46YWRtaW4="
 ```
 
 **PowerShell (Invoke-WebRequest):**
 ```powershell
+$headers = @{
+    "Authorization" = "Basic YWRtaW46YWRtaW4="
+}
+
 # Alle Postleitzahlen (paginiert, Seite 1 mit 20 Einträgen)
-Invoke-WebRequest -Uri "http://localhost:8080/api/premium/postcodes?page=1&size=20" -Method GET
+Invoke-WebRequest -Uri "http://localhost:8080/api/premium/postcodes?page=1&size=20" -Method GET -Headers $headers
 
 # Alle Postleitzahlen (paginiert, Seite 2 mit 10 Einträgen, sortiert nach Postleitzahl)
-Invoke-WebRequest -Uri "http://localhost:8080/api/premium/postcodes?page=2&size=10&sort=postalCode,asc" -Method GET
+Invoke-WebRequest -Uri "http://localhost:8080/api/premium/postcodes?page=2&size=10&sort=postalCode,asc" -Method GET -Headers $headers
 ```
 
 ### Postleitzahlen nach Präfix suchen
 
 **cURL:**
 ```bash
-curl -X GET http://localhost:8080/api/premium/postcodes/search/803
+curl -X GET http://localhost:8080/api/premium/postcodes/search/803 \
+  -H "Authorization: Basic YWRtaW46YWRtaW4="
 ```
 
 **PowerShell (Invoke-WebRequest):**
 ```powershell
-Invoke-WebRequest -Uri "http://localhost:8080/api/premium/postcodes/search/803" -Method GET
+$headers = @{
+    "Authorization" = "Basic YWRtaW46YWRtaW4="
+}
+
+Invoke-WebRequest -Uri "http://localhost:8080/api/premium/postcodes/search/803" -Method GET -Headers $headers
 ```
 
 ### Versicherungsanfrage erstellen
@@ -213,6 +257,7 @@ Invoke-WebRequest -Uri "http://localhost:8080/api/premium/postcodes/search/803" 
 ```bash
 curl -X POST http://localhost:8080/api/applications \
   -H "Content-Type: application/json" \
+  -H "Authorization: Basic YWRtaW46YWRtaW4=" \
   -d '{"postalCode": "10115", "vehicleType": "Mittelklasse", "annualMileage": 15000}'
 ```
 
@@ -224,67 +269,97 @@ $body = @{
     annualMileage = 15000
 } | ConvertTo-Json
 
+$headers = @{
+    "Authorization" = "Basic YWRtaW46YWRtaW4="
+}
+
 Invoke-WebRequest -Uri "http://localhost:8080/api/applications" `
   -Method POST `
   -ContentType "application/json" `
-  -Body $body
+  -Body $body `
+  -Headers $headers
 ```
 
 ### Abrufen aller Versicherungsanfragen
 
 **cURL:**
 ```bash
-curl -X GET http://localhost:8080/api/applications
+curl -X GET http://localhost:8080/api/applications \
+  -H "Authorization: Basic YWRtaW46YWRtaW4="
 ```
 
 **PowerShell (Invoke-WebRequest):**
 ```powershell
-Invoke-WebRequest -Uri "http://localhost:8080/api/applications" -Method GET
+$headers = @{
+    "Authorization" = "Basic YWRtaW46YWRtaW4="
+}
+
+Invoke-WebRequest -Uri "http://localhost:8080/api/applications" -Method GET -Headers $headers
 ```
 
 ### Abrufen einer spezifischen Versicherungsanfrage
 
 **cURL:**
 ```bash
-curl -X GET http://localhost:8080/api/applications/1
+curl -X GET http://localhost:8080/api/applications/1 \
+  -H "Authorization: Basic YWRtaW46YWRtaW4="
 ```
 
 **PowerShell (Invoke-WebRequest):**
 ```powershell
-Invoke-WebRequest -Uri "http://localhost:8080/api/applications/1" -Method GET
+$headers = @{
+    "Authorization" = "Basic YWRtaW46YWRtaW4="
+}
+
+Invoke-WebRequest -Uri "http://localhost:8080/api/applications/1" -Method GET -Headers $headers
 ```
 
 ### Abrufen von Versicherungsanfragen nach Status
 
 **cURL:**
 ```bash
-curl -X GET http://localhost:8080/api/applications/status/NEW
+curl -X GET http://localhost:8080/api/applications/status/NEW \
+  -H "Authorization: Basic YWRtaW46YWRtaW4="
 ```
 
 **PowerShell (Invoke-WebRequest):**
 ```powershell
-Invoke-WebRequest -Uri "http://localhost:8080/api/applications/status/NEW" -Method GET
+$headers = @{
+    "Authorization" = "Basic YWRtaW46YWRtaW4="
+}
+
+Invoke-WebRequest -Uri "http://localhost:8080/api/applications/status/NEW" -Method GET -Headers $headers
 ```
 
 ### Aktualisieren des Status einer Versicherungsanfrage
 
 **cURL:**
 ```bash
-curl -X PUT http://localhost:8080/api/applications/1/status/ACCEPTED
+curl -X PUT http://localhost:8080/api/applications/1/status/ACCEPTED \
+  -H "Authorization: Basic YWRtaW46YWRtaW4="
 ```
 
 **PowerShell (Invoke-WebRequest):**
 ```powershell
-Invoke-WebRequest -Uri "http://localhost:8080/api/applications/1/status/ACCEPTED" -Method PUT
+$headers = @{
+    "Authorization" = "Basic YWRtaW46YWRtaW4="
+}
+
+Invoke-WebRequest -Uri "http://localhost:8080/api/applications/1/status/ACCEPTED" -Method PUT -Headers $headers
 ```
 
 ### Löschen einer Versicherungsanfrage
 
 **cURL:**
 ```bash
-curl -X DELETE http://localhost:8080/api/applications/1
+curl -X DELETE http://localhost:8080/api/applications/1 \
+  -H "Authorization: Basic YWRtaW46YWRtaW4="
 ```
 
 **PowerShell (Invoke-WebRequest):**
 ```powershell
-Invoke-WebRequest -Uri "http://localhost:8080/api/applications/1" -Method DELETE
+$headers = @{
+    "Authorization" = "Basic YWRtaW46YWRtaW4="
+}
+
+Invoke-WebRequest -Uri "http://localhost:8080/api/applications/1" -Method DELETE -Headers $headers

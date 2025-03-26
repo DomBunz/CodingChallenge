@@ -240,24 +240,24 @@ Die Migrationsskripte werden im Ressourcenverzeichnis `src/main/resources/db/mig
 
 ## Sicherheitsimplementierung (optional)
 
-Die Sicherheit der Anwendung ist ein kritischer Aspekt, insbesondere wenn es um Versicherungsdaten und Drittanbieter-Integrationen geht. Für dieses Projekt wird Apache Shiro als Sicherheitsframework implementiert.
+Die Sicherheit der Anwendung ist ein kritischer Aspekt, insbesondere wenn es um Versicherungsdaten und Drittanbieter-Integrationen geht. Für dieses Projekt wird Spring Security als Sicherheitsframework implementiert.
 
-### Warum Apache Shiro?
+### Warum Spring Security?
 
-Apache Shiro wurde aus folgenden Gründen ausgewählt:
+Spring Security wurde aus folgenden Gründen ausgewählt:
 
-1. **Einfachheit**: Shiro bietet eine unkomplizierte API, die im Vergleich zu Alternativen wie Spring Security leichter zu verstehen und zu implementieren ist.
-2. **Umfassend**: Es bietet Authentifizierung, Autorisierung, Kryptographie und Session-Management in einem einzigen Framework.
-3. **Flexibilität**: Shiro arbeitet gut mit verschiedenen Authentifizierungsquellen (LDAP, Datenbank, benutzerdefinierte Realms).
-4. **Integration**: Es lässt sich nahtlos in Spring Boot integrieren.
-5. **Leichtgewichtig**: Shiro hat minimale Abhängigkeiten und einen geringen Footprint.
+1. **Native Integration**: Spring Security integriert sich nahtlos in das bestehende Spring Boot-Ökosystem der Anwendung.
+2. **Umfassend**: Es bietet robuste Lösungen für Authentifizierung, Autorisierung, Kryptographie und Session-Management.
+3. **Aktive Entwicklung**: Spring Security wird aktiv weiterentwickelt und mit regelmäßigen Updates versorgt.
+4. **Flexibilität**: Es unterstützt verschiedene Authentifizierungsquellen (LDAP, Datenbank, OAuth2/OIDC).
+5. **Moderne Sicherheitsfeatures**: Bietet standardmäßig Schutz vor gängigen Sicherheitsbedrohungen wie CSRF, XSS und mehr.
 
 ### Sicherheitsarchitektur
 
 #### 1. Authentifizierungs- und Autorisierungsablauf
 
 ```
-Benutzer/API-Client → Authentifizierungsfilter → Realm (DB) → Autorisierungsprüfung → Geschützte Ressourcen
+Benutzer/API-Client → Authentication Filter → UserDetailsService (DB) → Authorization Check → Geschützte Ressourcen
 ```
 
 #### 2. Rollenbasierte Zugriffssteuerung
@@ -266,64 +266,53 @@ Basierend auf den Anforderungen der Anwendung werden folgende Rollen und Berecht
 
 ##### Rollen
 
-1. **ADMIN**
+1. **ROLE_ADMIN**
    - Systemadministratoren, die die Anwendung verwalten
    - Vollzugriff auf alle Funktionen und administrativen Funktionen
 
-2. **AGENT**
+2. **ROLE_AGENT**
    - Versicherungsagenten, die Anträge bearbeiten
    - Können Anträge erstellen und einsehen
    - Können Prämien berechnen
 
-3. **CUSTOMER**
+3. **ROLE_CUSTOMER**
    - Endbenutzer, die Versicherungen beantragen
    - Können eigene Anträge erstellen
    - Können den Status ihrer eigenen Anträge und Prämienberechnungen einsehen
 
-4. **API_CLIENT**
+4. **ROLE_API_CLIENT**
    - Drittsysteme, die sich mit der API integrieren
    - Beschränkt auf bestimmte API-Endpunkte
 
 ##### Berechtigungen
 
-Die Berechtigungsstruktur verwendet ein hierarchisches System mit Wildcards:
+Die Berechtigungsstruktur wird über Spring Security's Method-Level Security mit `@PreAuthorize` Annotationen implementiert:
 
 1. **Antragsverwaltung**
-   - `application:create` - Neue Anträge erstellen
-   - `application:read` - Antragsdetails anzeigen
-   - `application:read:all` - Alle Anträge anzeigen (für Agenten/Admins)
-   - `application:update` - Antragsdetails aktualisieren
-   - `application:delete` - Anträge löschen
+   - `hasAuthority('APPLICATION_CREATE')` - Neue Anträge erstellen
+   - `hasAuthority('APPLICATION_READ')` - Antragsdetails anzeigen
+   - `hasAuthority('APPLICATION_READ_ALL')` - Alle Anträge anzeigen (für Agenten/Admins)
+   - `hasAuthority('APPLICATION_UPDATE')` - Antragsdetails aktualisieren
+   - `hasAuthority('APPLICATION_DELETE')` - Anträge löschen
 
 2. **Prämienberechnung**
-   - `premium:calculate` - Prämien berechnen
-   - `premium:factors:read` - Prämienfaktoren anzeigen
-   - `premium:factors:update` - Prämienfaktoren aktualisieren (nur Admin)
+   - `hasAuthority('PREMIUM_CALCULATE')` - Prämien berechnen
+   - `hasAuthority('PREMIUM_FACTORS_READ')` - Prämienfaktoren anzeigen
+   - `hasAuthority('PREMIUM_FACTORS_UPDATE')` - Prämienfaktoren aktualisieren (nur Admin)
 
 3. **Benutzerverwaltung**
-   - `user:create` - Benutzer erstellen
-   - `user:read` - Benutzerdetails anzeigen
-   - `user:read:all` - Alle Benutzer anzeigen (nur Admin)
-   - `user:update` - Benutzerdetails aktualisieren
-   - `user:delete` - Benutzer löschen
+   - `hasAuthority('USER_CREATE')` - Benutzer erstellen
+   - `hasAuthority('USER_READ')` - Benutzerdetails anzeigen
+   - `hasAuthority('USER_READ_ALL')` - Alle Benutzer anzeigen (nur Admin)
+   - `hasAuthority('USER_UPDATE')` - Benutzerdetails aktualisieren
+   - `hasAuthority('USER_DELETE')` - Benutzer löschen
 
 4. **Systemverwaltung**
-   - `system:config:read` - Systemkonfiguration anzeigen
-   - `system:config:update` - Systemkonfiguration aktualisieren
-   - `system:logs:read` - Systemprotokolle anzeigen
-
-##### Berechtigungszuweisung nach Rolle
-
-| Rolle | Berechtigungen |
-|-------|----------------|
-| ADMIN       | Alle Berechtigungen (*) |
-| AGENT       | application:create, application:read:all, application:update, premium:calculate, premium:factors:read, user:read |
-| CUSTOMER    | application:create, application:read (eigene), premium:calculate |
-| API_CLIENT  | premium:calculate, application:create (mit Ratenbegrenzung) |
+   - `hasAuthority('SYSTEM_CONFIG_READ')` - Systemkonfiguration anzeigen
 
 ### Zusätzliche Sicherheitsaspekte
 
-1. **Passwortspeicherung**: Verwendung der integrierten Hashing-Funktionen von Shiro mit Salting für sichere Passwortspeicherung.
+1. **Passwortspeicherung**: Verwendung der integrierten Hashing-Funktionen von Spring Security mit Salting für sichere Passwortspeicherung.
 
 2. **HTTPS**: Konfiguration der Anwendung für die Verwendung von HTTPS in der Produktion mit entsprechenden Zertifikaten.
 
@@ -394,7 +383,7 @@ Ich würde folgende Frameworks verwenden:
    - Performance-Tests (wenn nötig, aktuell kein Bedarf)
 
 5. **Optional**
-   - Implementierung von Shiro
+   - Implementierung von Spring Security
    - Implementierung der Thymeleaf-Templates
 
 ## Mögliche zukünftige Erweiterungen
