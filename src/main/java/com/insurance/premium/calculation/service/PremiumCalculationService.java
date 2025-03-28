@@ -2,12 +2,16 @@ package com.insurance.premium.calculation.service;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.annotation.Validated;
@@ -16,6 +20,8 @@ import com.insurance.premium.calculation.domain.MileageFactor;
 import com.insurance.premium.calculation.domain.Region;
 import com.insurance.premium.calculation.domain.RegionFactor;
 import com.insurance.premium.calculation.domain.VehicleType;
+import com.insurance.premium.calculation.dto.FactorResponse;
+import com.insurance.premium.calculation.dto.PostcodeResponse;
 import com.insurance.premium.calculation.dto.PremiumCalculationRequest;
 import com.insurance.premium.calculation.dto.PremiumCalculationResult;
 import com.insurance.premium.calculation.repository.MileageFactorRepository;
@@ -97,6 +103,90 @@ public class PremiumCalculationService {
                 regionFactor.getFactor(), 
                 calculatedPremium
         );
+    }
+    
+    /**
+     * Get all factors for premium calculation
+     * 
+     * @return Map of factor types to factor lists
+     */
+    @Transactional(readOnly = true)
+    public Map<String, List<FactorResponse>> getAllFactors() {
+        logger.debug("Getting all factors for premium calculation");
+        Map<String, List<FactorResponse>> factors = new HashMap<>();
+        factors.put("regionFactors", this.getAllRegionFactors());
+        factors.put("vehicleTypeFactors", this.getAllVehicleFactors());
+        factors.put("mileageFactors", this.getAllMileageFactors());
+        return factors;
+    }
+    
+    /**
+     * Get all region factors
+     * 
+     * @return List of region factors
+     */
+    @Transactional(readOnly = true)
+    public List<FactorResponse> getAllRegionFactors() {
+        logger.debug("Getting all region factors");
+        // Get unique region factors
+        return regionRepository.findAll().stream()
+                .map(Region::getRegionFactor)
+                .distinct()
+                .map(FactorResponse::fromRegionFactor)
+                .toList();
+    }
+    
+    /**
+     * Get all vehicle type factors
+     * 
+     * @return List of vehicle type factors
+     */
+    @Transactional(readOnly = true)
+    public List<FactorResponse> getAllVehicleFactors() {
+        logger.debug("Getting all vehicle type factors");
+        return vehicleTypeRepository.findAll().stream()
+                .map(FactorResponse::fromVehicleType)
+                .toList();
+    }
+    
+    /**
+     * Get all mileage factors
+     * 
+     * @return List of mileage factors
+     */
+    @Transactional(readOnly = true)
+    public List<FactorResponse> getAllMileageFactors() {
+        logger.debug("Getting all mileage factors");
+        return mileageFactorRepository.findAllByOrderByMinMileageAsc().stream()
+                .map(FactorResponse::fromMileageFactor)
+                .toList();
+    }
+    
+    /**
+     * Get all postcodes with pagination
+     * 
+     * @param pageable Pagination information
+     * @return Page of postcode responses
+     */
+    @Transactional(readOnly = true)
+    public Page<PostcodeResponse> getAllPostcodes(Pageable pageable) {
+        logger.debug("Getting all postcodes with pagination");
+        return regionRepository.findAll(pageable)
+                .map(PostcodeResponse::fromRegion);
+    }
+    
+    /**
+     * Search postcodes by prefix
+     * 
+     * @param prefix Postal code prefix
+     * @return List of matching postcode responses
+     */
+    @Transactional(readOnly = true)
+    public List<PostcodeResponse> getPostcodesByPrefix(String prefix) {
+        logger.debug("Searching postcodes by prefix: {}", prefix);
+        return regionRepository.findByPostalCodeStartingWith(prefix).stream()
+                .map(PostcodeResponse::fromRegion)
+                .toList();
     }
     
     /**

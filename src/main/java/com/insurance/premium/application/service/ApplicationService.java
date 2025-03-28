@@ -79,6 +79,7 @@ public class ApplicationService {
      * @param id The application ID
      * @return Optional containing the application if found
      */
+    @Transactional(readOnly = true)
     public Optional<Application> getApplication(Long id) {
         logger.debug("Retrieving application [id={}]", id);
         Optional<Application> application = applicationRepository.findById(id);
@@ -96,6 +97,7 @@ public class ApplicationService {
      * @param pageable Pagination information
      * @return Page of applications
      */
+    @Transactional(readOnly = true)
     public Page<Application> getAllApplications(Pageable pageable) {
         logger.debug("Retrieving all applications with pagination [page={}, size={}]", 
                 pageable.getPageNumber(), pageable.getPageSize());
@@ -109,6 +111,7 @@ public class ApplicationService {
      * 
      * @return List of all applications
      */
+    @Transactional(readOnly = true)
     public List<Application> getAllApplications() {
         logger.debug("Retrieving all applications");
         List<Application> applications = applicationRepository.findAll();
@@ -123,6 +126,7 @@ public class ApplicationService {
      * @param pageable Pagination information
      * @return Page of applications with the given status
      */
+    @Transactional(readOnly = true)
     public Page<Application> getApplicationsByStatus(Status status, Pageable pageable) {
         logger.debug("Retrieving applications with status {} and pagination [page={}, size={}]", 
                 status, pageable.getPageNumber(), pageable.getPageSize());
@@ -137,6 +141,7 @@ public class ApplicationService {
      * @param status The application status to filter by
      * @return List of applications with the given status
      */
+    @Transactional(readOnly = true)
     public List<Application> getApplicationsByStatus(Status status) {
         logger.debug("Retrieving applications with status {}", status);
         List<Application> applications = applicationRepository.findByStatus(status);

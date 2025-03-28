@@ -378,7 +378,7 @@ Ich würde folgende Frameworks verwenden:
    - Dokumentation der API (done)
 
 4. **Tests und Qualitätssicherung (done)**
-   - Implementierung der Tests (done)
+   - Implementierung der Tests (done, omitted for now: security components, web controllers, full integration tests)
    - Code-Qualitätsanalyse (automatisch durch SonarLint)
    - Performance-Tests (wenn nötig, aktuell kein Bedarf)
 

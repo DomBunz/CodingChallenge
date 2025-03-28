@@ -7,12 +7,15 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import java.math.BigDecimal;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.context.annotation.Import;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
@@ -22,19 +25,15 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.insurance.premium.calculation.domain.MileageFactor;
-import com.insurance.premium.calculation.domain.Region;
-import com.insurance.premium.calculation.domain.RegionFactor;
-import com.insurance.premium.calculation.domain.VehicleType;
+import com.insurance.premium.calculation.dto.FactorResponse;
+import com.insurance.premium.calculation.dto.PostcodeResponse;
 import com.insurance.premium.calculation.dto.PremiumCalculationRequest;
 import com.insurance.premium.calculation.dto.PremiumCalculationResult;
-import com.insurance.premium.calculation.repository.MileageFactorRepository;
-import com.insurance.premium.calculation.repository.RegionRepository;
-import com.insurance.premium.calculation.repository.VehicleTypeRepository;
 import com.insurance.premium.calculation.service.PremiumCalculationService;
-import com.insurance.premium.common.service.ConfigurationService;
+import com.insurance.premium.security.config.TestSecurityConfig;
 
 @WebMvcTest(PremiumCalculationController.class)
+@Import(TestSecurityConfig.class)
 class PremiumCalculationControllerTest {
 
     @Autowired
@@ -46,23 +45,13 @@ class PremiumCalculationControllerTest {
     @MockitoBean
     private PremiumCalculationService calculationService;
 
-    @MockitoBean
-    private RegionRepository regionRepository;
-
-    @MockitoBean
-    private VehicleTypeRepository vehicleTypeRepository;
-
-    @MockitoBean
-    private MileageFactorRepository mileageFactorRepository;
-    
-    @MockitoBean
-    private ConfigurationService configurationService;
-
     private PremiumCalculationRequest validRequest;
     private PremiumCalculationResult calculationResult;
-    private Region testRegion;
-    private VehicleType testVehicleType;
-    private MileageFactor testMileageFactor;
+    private List<FactorResponse> regionFactors;
+    private List<FactorResponse> vehicleFactors;
+    private List<FactorResponse> mileageFactors;
+    private List<PostcodeResponse> postcodes;
+    private Page<PostcodeResponse> pagedPostcodes;
 
     @BeforeEach
     void setUp() {
@@ -79,36 +68,33 @@ class PremiumCalculationControllerTest {
             new BigDecimal("1.2"),
             new BigDecimal("900.00")
         );
-
-        // Setup region
-        RegionFactor regionFactor = new RegionFactor();
-        regionFactor.setId(1L);
-        regionFactor.setFederalState("Berlin");
-        regionFactor.setFactor(new BigDecimal("1.2"));
-
-        testRegion = new Region();
-        testRegion.setId(1L);
-        testRegion.setPostalCode("10115");
-        testRegion.setCity("Berlin");
-        testRegion.setFederalState("Berlin");
-        testRegion.setCountry("Germany");
-        testRegion.setRegionFactor(regionFactor);
-
-        // Setup vehicle type
-        testVehicleType = new VehicleType();
-        testVehicleType.setId(1L);
-        testVehicleType.setName("Kompaktklasse");
-        testVehicleType.setFactor(new BigDecimal("1.0"));
-
-        // Setup mileage factor
-        testMileageFactor = new MileageFactor();
-        testMileageFactor.setId(1L);
-        testMileageFactor.setMinMileage(10000);
-        testMileageFactor.setMaxMileage(20000);
-        testMileageFactor.setFactor(new BigDecimal("1.5"));
+        
+        // Setup factor responses
+        regionFactors = Arrays.asList(
+            new FactorResponse("Berlin", new BigDecimal("1.2"), "Region factor for Berlin")
+        );
+        
+        vehicleFactors = Arrays.asList(
+            new FactorResponse("Kompaktklasse", new BigDecimal("1.0"), "Vehicle type factor for Kompaktklasse")
+        );
+        
+        mileageFactors = Arrays.asList(
+            new FactorResponse("10000-20000 km", new BigDecimal("1.5"), "Mileage factor for 10000-20000 km per year")
+        );
+        
+        // Setup postcode responses
+        postcodes = Arrays.asList(
+            new PostcodeResponse("10115", "Berlin", "Germany", "Berlin", "Berlin", "Mitte")
+        );
+        
+        pagedPostcodes = new PageImpl<>(postcodes);
         
         // Setup default mock responses
-        when(configurationService.getBasePremium()).thenReturn(new BigDecimal("500.00"));
+        when(calculationService.getAllRegionFactors()).thenReturn(regionFactors);
+        when(calculationService.getAllVehicleFactors()).thenReturn(vehicleFactors);
+        when(calculationService.getAllMileageFactors()).thenReturn(mileageFactors);
+        when(calculationService.getAllPostcodes(any(Pageable.class))).thenReturn(pagedPostcodes);
+        when(calculationService.getPostcodesByPrefix(anyString())).thenReturn(postcodes);
     }
 
     @Test
@@ -171,12 +157,6 @@ class PremiumCalculationControllerTest {
 
     @Test
     void getPostcodes_ReturnsPagedPostcodes() throws Exception {
-        // Arrange
-        List<Region> regions = Arrays.asList(testRegion);
-        Page<Region> pagedRegions = new PageImpl<>(regions);
-        
-        when(regionRepository.findAll(any(Pageable.class))).thenReturn(pagedRegions);
-
         // Act & Assert
         mockMvc.perform(get("/api/premium/postcodes")
                 .param("page", "0")
@@ -187,14 +167,11 @@ class PremiumCalculationControllerTest {
                 .andExpect(jsonPath("$.content[0].city").value("Berlin"))
                 .andExpect(jsonPath("$.content[0].federalState").value("Berlin"));
 
-        verify(regionRepository, times(1)).findAll(any(Pageable.class));
+        verify(calculationService, times(1)).getAllPostcodes(any(Pageable.class));
     }
 
     @Test
     void getPostcodesByPrefix_ReturnsMatchingPostcodes() throws Exception {
-        // Arrange
-        when(regionRepository.findByPostalCodeStartingWith("101")).thenReturn(Arrays.asList(testRegion));
-
         // Act & Assert
         mockMvc.perform(get("/api/premium/postcodes/search/101"))
                 .andExpect(status().isOk())
@@ -203,14 +180,11 @@ class PremiumCalculationControllerTest {
                 .andExpect(jsonPath("$[0].city").value("Berlin"))
                 .andExpect(jsonPath("$[0].federalState").value("Berlin"));
 
-        verify(regionRepository, times(1)).findByPostalCodeStartingWith("101");
+        verify(calculationService, times(1)).getPostcodesByPrefix("101");
     }
 
     @Test
     void getRegionFactors_ReturnsAllRegionFactors() throws Exception {
-        // Arrange
-        when(regionRepository.findAll()).thenReturn(Arrays.asList(testRegion));
-
         // Act & Assert
         mockMvc.perform(get("/api/premium/factors/region"))
                 .andExpect(status().isOk())
@@ -218,14 +192,11 @@ class PremiumCalculationControllerTest {
                 .andExpect(jsonPath("$[0].name").value("Berlin"))
                 .andExpect(jsonPath("$[0].factor").value("1.2"));
 
-        verify(regionRepository, times(1)).findAll();
+        verify(calculationService, times(1)).getAllRegionFactors();
     }
 
     @Test
     void getVehicleTypeFactors_ReturnsAllVehicleTypeFactors() throws Exception {
-        // Arrange
-        when(vehicleTypeRepository.findAll()).thenReturn(Arrays.asList(testVehicleType));
-
         // Act & Assert
         mockMvc.perform(get("/api/premium/factors/vehicle"))
                 .andExpect(status().isOk())
@@ -233,14 +204,11 @@ class PremiumCalculationControllerTest {
                 .andExpect(jsonPath("$[0].name").value("Kompaktklasse"))
                 .andExpect(jsonPath("$[0].factor").value("1.0"));
 
-        verify(vehicleTypeRepository, times(1)).findAll();
+        verify(calculationService, times(1)).getAllVehicleFactors();
     }
 
     @Test
     void getMileageFactors_ReturnsAllMileageFactors() throws Exception {
-        // Arrange
-        when(mileageFactorRepository.findAllByOrderByMinMileageAsc()).thenReturn(Arrays.asList(testMileageFactor));
-
         // Act & Assert
         mockMvc.perform(get("/api/premium/factors/mileage"))
                 .andExpect(status().isOk())
@@ -248,16 +216,18 @@ class PremiumCalculationControllerTest {
                 .andExpect(jsonPath("$[0].name").value("10000-20000 km"))
                 .andExpect(jsonPath("$[0].factor").value("1.5"));
 
-        verify(mileageFactorRepository, times(1)).findAllByOrderByMinMileageAsc();
+        verify(calculationService, times(1)).getAllMileageFactors();
     }
 
     @Test
     void getAllFactors_ReturnsAllFactors() throws Exception {
         // Arrange
-        when(regionRepository.findAll()).thenReturn(Arrays.asList(testRegion));
-        when(vehicleTypeRepository.findAll()).thenReturn(Arrays.asList(testVehicleType));
-        when(mileageFactorRepository.findAllByOrderByMinMileageAsc()).thenReturn(Arrays.asList(testMileageFactor));
-        when(configurationService.getBasePremium()).thenReturn(new BigDecimal("500.00"));
+        Map<String, List<FactorResponse>> allFactors = new HashMap<>();
+        allFactors.put("regionFactors", regionFactors);
+        allFactors.put("vehicleTypeFactors", vehicleFactors);
+        allFactors.put("mileageFactors", mileageFactors);
+        
+        when(calculationService.getAllFactors()).thenReturn(allFactors);
 
         // Act & Assert
         mockMvc.perform(get("/api/premium/factors"))
@@ -267,9 +237,7 @@ class PremiumCalculationControllerTest {
                 .andExpect(jsonPath("$.vehicleTypeFactors[0].name").value("Kompaktklasse"))
                 .andExpect(jsonPath("$.mileageFactors[0].name").value("10000-20000 km"));
 
-        verify(regionRepository, times(1)).findAll();
-        verify(vehicleTypeRepository, times(1)).findAll();
-        verify(mileageFactorRepository, times(1)).findAllByOrderByMinMileageAsc();
+        verify(calculationService, times(1)).getAllFactors();
     }
     
     // Input validation tests to protect against injection attacks and malicious inputs
@@ -336,8 +304,8 @@ class PremiumCalculationControllerTest {
         // Arrange
         String maliciousPrefix = "' OR '1'='1"; // SQL injection attempt
         
-        when(regionRepository.findByPostalCodeStartingWith(maliciousPrefix))
-            .thenReturn(List.of()); // Assuming the repository safely handles this
+        when(calculationService.getPostcodesByPrefix(maliciousPrefix))
+            .thenReturn(List.of()); // Assuming the service safely handles this
             
         // Act & Assert
         mockMvc.perform(get("/api/premium/postcodes/search/" + maliciousPrefix))
@@ -346,13 +314,13 @@ class PremiumCalculationControllerTest {
                 .andExpect(jsonPath("$").isArray())
                 .andExpect(jsonPath("$").isEmpty());
                 
-        verify(regionRepository, times(1)).findByPostalCodeStartingWith(maliciousPrefix);
+        verify(calculationService, times(1)).getPostcodesByPrefix(maliciousPrefix);
     }
     
     @Test
     void getPostcodes_WithNegativePage_ReturnsEmptyPage() throws Exception {
-        // Mock the repository to return empty page for invalid pagination
-        when(regionRepository.findAll(any(Pageable.class)))
+        // Arrange
+        when(calculationService.getAllPostcodes(any(Pageable.class)))
                 .thenReturn(Page.empty());
         
         // Act & Assert
@@ -366,8 +334,8 @@ class PremiumCalculationControllerTest {
     
     @Test
     void getPostcodes_WithExcessivePageSize_ReturnsEmptyPage() throws Exception {
-        // Mock the repository to return empty page for invalid pagination
-        when(regionRepository.findAll(any(Pageable.class)))
+        // Arrange
+        when(calculationService.getAllPostcodes(any(Pageable.class)))
                 .thenReturn(Page.empty());
         
         // Act & Assert
