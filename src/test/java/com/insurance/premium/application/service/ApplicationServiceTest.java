@@ -7,12 +7,16 @@ import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.Optional;
 
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContext;
+import org.springframework.security.core.context.SecurityContextHolder;
 
 import com.insurance.premium.application.domain.Application;
 import com.insurance.premium.application.domain.Application.Status;
@@ -21,6 +25,8 @@ import com.insurance.premium.application.repository.ApplicationRepository;
 import com.insurance.premium.calculation.dto.PremiumCalculationRequest;
 import com.insurance.premium.calculation.dto.PremiumCalculationResult;
 import com.insurance.premium.calculation.service.PremiumCalculationService;
+import com.insurance.premium.security.domain.User;
+import com.insurance.premium.security.service.UserService;
 
 @ExtendWith(MockitoExtension.class)
 class ApplicationServiceTest {
@@ -31,11 +37,29 @@ class ApplicationServiceTest {
     @Mock
     private PremiumCalculationService calculationService;
     
+    @Mock
+    private UserService userService;
+    
     @InjectMocks
     private ApplicationService applicationService;
     
+    private static final String TEST_USERNAME = "testuser";
+    
+    @AfterEach
+    void tearDown() {
+        // Clear SecurityContext after each test
+        SecurityContextHolder.clearContext();
+    }
+    
     @Test
     void createApplication_ShouldCreateAndSaveApplication() {
+        // Setup SecurityContext mock for this test only
+        SecurityContext securityContext = mock(SecurityContext.class);
+        Authentication authentication = mock(Authentication.class);
+        when(securityContext.getAuthentication()).thenReturn(authentication);
+        when(authentication.getName()).thenReturn(TEST_USERNAME);
+        SecurityContextHolder.setContext(securityContext);
+        
         // Arrange
         String postalCode = "10115";
         String vehicleType = "Kompaktklasse";
@@ -57,6 +81,12 @@ class ApplicationServiceTest {
         when(calculationService.calculatePremium(any(PremiumCalculationRequest.class)))
             .thenReturn(calculationResult);
         
+        // Mock user service
+        User testUser = new User();
+        testUser.setId(1L);
+        testUser.setUsername(TEST_USERNAME);
+        when(userService.findByUsername(TEST_USERNAME)).thenReturn(Optional.of(testUser));
+        
         Application savedApplication = new Application();
         savedApplication.setId(1L);
         savedApplication.setPostalCode(postalCode);
@@ -69,6 +99,7 @@ class ApplicationServiceTest {
         savedApplication.setCalculatedPremium(calculatedPremium);
         savedApplication.setCreatedAt(LocalDateTime.now());
         savedApplication.setStatus(Status.NEW);
+        savedApplication.setCreatedBy(testUser);
         
         when(applicationRepository.save(any(Application.class))).thenReturn(savedApplication);
         
@@ -92,6 +123,9 @@ class ApplicationServiceTest {
         assertEquals(postalCode, capturedRequest.postalCode());
         assertEquals(vehicleType, capturedRequest.vehicleType());
         assertEquals(annualMileage, capturedRequest.annualMileage());
+        
+        // Verify user service was called
+        verify(userService).findByUsername(TEST_USERNAME);
         
         // Verify application was saved
         verify(applicationRepository).save(any(Application.class));

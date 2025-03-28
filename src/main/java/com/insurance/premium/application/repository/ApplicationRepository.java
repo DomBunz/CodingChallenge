@@ -7,6 +7,7 @@ import org.springframework.stereotype.Repository;
 
 import com.insurance.premium.application.domain.Application;
 import com.insurance.premium.application.domain.Application.Status;
+import com.insurance.premium.security.domain.User;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -54,4 +55,31 @@ public interface ApplicationRepository extends JpaRepository<Application, Long> 
      * @return List of applications created after the given date
      */
     List<Application> findByCreatedAtAfter(LocalDateTime date);
+    
+    /**
+     * Find applications by the user who created them
+     * 
+     * @param createdBy The user who created the applications
+     * @return List of applications created by the given user
+     */
+    List<Application> findByCreatedBy(User createdBy);
+    
+    /**
+     * Find applications by the user who created them with pagination
+     * 
+     * @param createdBy The user who created the applications
+     * @param pageable Pagination information
+     * @return Page of applications created by the given user
+     */
+    Page<Application> findByCreatedBy(User createdBy, Pageable pageable);
+    
+    /**
+     * Find applications by the user who created them and status with pagination
+     * 
+     * @param createdBy The user who created the applications
+     * @param status The application status
+     * @param pageable Pagination information
+     * @return Page of applications created by the given user with the given status
+     */
+    Page<Application> findByCreatedByAndStatus(User createdBy, Status status, Pageable pageable);
 }

@@ -1,11 +1,15 @@
 package com.insurance.premium.application.domain;
 
 import com.insurance.premium.common.domain.BaseEntity;
+import com.insurance.premium.security.domain.User;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import jakarta.validation.constraints.NotNull;
 
@@ -18,11 +22,11 @@ import java.time.LocalDateTime;
 public class Application extends BaseEntity {
 
     public Application() {} // default constructor for JPA
-
+    
     @SuppressWarnings("java:S107") // number of parameters
     public Application(Integer annualMileage, String vehicleType, String postalCode, BigDecimal basePremium,
             BigDecimal mileageFactor, BigDecimal vehicleFactor, BigDecimal regionFactor, BigDecimal calculatedPremium,
-            LocalDateTime createdAt, Status status) {
+            LocalDateTime createdAt, Status status, User createdBy) {
         this.annualMileage = annualMileage;
         this.vehicleType = vehicleType;
         this.postalCode = postalCode;
@@ -33,6 +37,7 @@ public class Application extends BaseEntity {
         this.calculatedPremium = calculatedPremium;
         this.createdAt = createdAt;
         this.status = status;
+        this.createdBy = createdBy;
     }
 
     public enum Status {
@@ -54,23 +59,23 @@ public class Application extends BaseEntity {
     private String postalCode;
 
     @NotNull
-    @Column(name = "base_premium", nullable = false)
+    @Column(name = "base_premium", nullable = false, precision = 10, scale = 2)
     private BigDecimal basePremium;
 
     @NotNull
-    @Column(name = "mileage_factor", nullable = false)
+    @Column(name = "mileage_factor", nullable = false, precision = 10, scale = 2)
     private BigDecimal mileageFactor;
 
     @NotNull
-    @Column(name = "vehicle_factor", nullable = false)
+    @Column(name = "vehicle_factor", nullable = false, precision = 10, scale = 2)
     private BigDecimal vehicleFactor;
 
     @NotNull
-    @Column(name = "region_factor", nullable = false)
+    @Column(name = "region_factor", nullable = false, precision = 10, scale = 2)
     private BigDecimal regionFactor;
 
     @NotNull
-    @Column(name = "calculated_premium", nullable = false)
+    @Column(name = "calculated_premium", nullable = false, precision = 10, scale = 2)
     private BigDecimal calculatedPremium;
 
     @NotNull
@@ -81,6 +86,10 @@ public class Application extends BaseEntity {
     @Enumerated(EnumType.STRING)
     @Column(name = "status", nullable = false)
     private Status status;
+    
+    @ManyToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "created_by_id")
+    private User createdBy;
 
     public Integer getAnnualMileage() {
         return annualMileage;
@@ -162,6 +171,14 @@ public class Application extends BaseEntity {
         this.status = status;
     }
     
+    public User getCreatedBy() {
+        return createdBy;
+    }
+    
+    public void setCreatedBy(User createdBy) {
+        this.createdBy = createdBy;
+    }
+
     @Override
     public String toString() {
         return "Application{" +
@@ -175,7 +192,8 @@ public class Application extends BaseEntity {
                "regionFactor:" + regionFactor + "," +
                "calculatedPremium:" + calculatedPremium + "," +
                "createdAt:" + createdAt + "," +
-               "status:" + status +
+               "status:" + status + "," +
+               "createdBy:" + createdBy +
                '}';
     }
 }

@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title th:text="${isMyApplications} ? 'My Applications - Insurance Premium Calculator' : 'Applications - Insurance Premium Calculator'">Applications - Insurance Premium Calculator</title>
+    
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    
+    <!-- Custom CSS -->
+    <link th:href="@{/css/styles.css}" rel="stylesheet">
+</head>
+<body>
+    <th:block th:replace="~{layout :: navbar}"></th:block>
+    
+    <div class="container mt-4">
+        <div th:fragment="content">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h1 th:text="${isMyApplications} ? 'My Applications' : 'Applications'">Applications</h1>
+                <a th:if="${#authorization.expression('hasAuthority(''ROLE_CUSTOMER'')')}" th:href="@{/application-form}" class="btn btn-primary">New Application</a>
+            </div>
+            
+            <!-- Filter by Status -->
+            <div class="card mb-4">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="card-title mb-0">Filter Applications</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="statusFilter" class="form-label">Status</label>
+                                <div class="d-flex">
+                                    <select id="statusFilter" class="form-select me-2">
+                                        <option value="">All Statuses</option>
+                                        <option th:each="status : ${statuses}" 
+                                                th:value="${status}" 
+                                                th:text="${status}"
+                                                th:selected="${currentStatus != null && currentStatus == status}"></option>
+                                    </select>
+                                    <button id="applyFilter" class="btn btn-primary">Apply</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Applications Table -->
+            <div class="card">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="card-title mb-0" th:text="${isMyApplications} ? 'My Applications List' : 'Applications List'">Applications List</h5>
+                </div>
+                <div class="card-body">
+                    <div th:if="${applications.empty}" class="alert alert-info">
+                        <span th:text="${isMyApplications} ? 'You have no applications yet.' : 'No applications found.'">No applications found.</span>
+                    </div>
+                    
+                    <div th:if="${!applications.empty}" class="table-responsive">
+                        <table class="table table-striped table-hover">
+                            <thead>
+                                <tr>
+                                    <th>ID</th>
+                                    <th>Postal Code</th>
+                                    <th>Vehicle Type</th>
+                                    <th>Annual Mileage</th>
+                                    <th>Premium</th>
+                                    <th>Status</th>
+                                    <th>Created</th>
+                                    <th sec:authorize="hasAnyAuthority('ROLE_ADMIN', 'ROLE_AGENT')">Created By</th>
+                                    <th sec:authorize="hasAnyAuthority('ROLE_ADMIN', 'ROLE_AGENT')">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr th:each="app : ${applications}">
+                                    <td th:text="${app.id}"></td>
+                                    <td th:text="${app.postalCode}"></td>
+                                    <td th:text="${app.vehicleType}"></td>
+                                    <td th:text="${app.annualMileage}"></td>
+                                    <td th:text="${#numbers.formatDecimal(app.calculatedPremium, 1, 2)} + ' €'"></td>
+                                    <td>
+                                        <span th:class="'badge ' + ${app.status.name() == 'NEW' ? 'bg-primary' : (app.status.name() == 'ACCEPTED' ? 'bg-success' : 'bg-danger')}" 
+                                              th:text="${app.status}"></span>
+                                    </td>
+                                    <td th:text="${#temporals.format(app.createdAt, 'yyyy-MM-dd HH:mm')}"></td>
+                                    <td sec:authorize="hasAnyAuthority('ROLE_ADMIN', 'ROLE_AGENT')">
+                                        <span th:if="${app.createdBy != null}" th:text="${app.createdBy.username}"></span>
+                                        <span th:if="${app.createdBy == null}" class="text-muted">Unknown</span>
+                                    </td>
+                                    <td sec:authorize="hasAnyAuthority('ROLE_ADMIN', 'ROLE_AGENT')">
+                                        <div class="btn-group btn-group-sm">
+                                            <button class="btn btn-outline-success btn-sm status-action" 
+                                                    th:data-id="${app.id}" 
+                                                    th:data-status="ACCEPTED"
+                                                    th:disabled="${app.status == 'ACCEPTED'}">
+                                                Accept
+                                            </button>
+                                            <button class="btn btn-outline-danger btn-sm status-action" 
+                                                    th:data-id="${app.id}" 
+                                                    th:data-status="REJECTED"
+                                                    th:disabled="${app.status == 'REJECTED'}">
+                                                Reject
+                                            </button>
+                                        </div>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    
+                    <!-- Pagination -->
+                    <div th:if="${applications.totalPages > 1}" class="d-flex justify-content-center mt-4">
+                        <nav>
+                            <ul class="pagination">
+                                <li class="page-item" th:classappend="${applications.first} ? 'disabled'">
+                                    <a class="page-link" th:href="@{${isMyApplications ? '/my-applications' : '/applications'}(page=${applications.number - 1}, size=${applications.size}, status=${currentStatus})}">&laquo;</a>
+                                </li>
+                                
+                                <li th:each="i : ${#numbers.sequence(0, applications.totalPages - 1)}" 
+                                    th:class="'page-item ' + ${i == applications.number ? 'active' : ''}">
+                                    <a class="page-link" th:href="@{${isMyApplications ? '/my-applications' : '/applications'}(page=${i}, size=${applications.size}, status=${currentStatus})}" th:text="${i + 1}"></a>
+                                </li>
+                                
+                                <li class="page-item" th:classappend="${applications.last} ? 'disabled'">
+                                    <a class="page-link" th:href="@{${isMyApplications ? '/my-applications' : '/applications'}(page=${applications.number + 1}, size=${applications.size}, status=${currentStatus})}">&raquo;</a>
+                                </li>
+                            </ul>
+                        </nav>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <th:block th:replace="~{layout :: footer}"></th:block>
+    
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <!-- Custom JavaScript -->
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Status filter
+            document.getElementById('applyFilter').addEventListener('click', function() {
+                const status = document.getElementById('statusFilter').value;
+                const baseUrl = window.location.pathname;
+                
+                if (status) {
+                    window.location.href = baseUrl + '?status=' + status;
+                } else {
+                    window.location.href = baseUrl;
+                }
+            });
+            
+            // Status actions
+            document.querySelectorAll('.status-action').forEach(button => {
+                button.addEventListener('click', function() {
+                    const id = this.getAttribute('data-id');
+                    const status = this.getAttribute('data-status');
+                    
+                    fetch(`/api/applications/${id}/status/${status}`, {
+                        method: 'PUT',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        }
+                    })
+                    .then(response => {
+                        if (response.ok) {
+                            window.location.reload();
+                        } else {
+                            alert('Failed to update status');
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
+                        alert('An error occurred');
+                    });
+                });
+            });
+        });
+    </script>
+</body>
+</html>

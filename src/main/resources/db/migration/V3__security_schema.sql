@@ -193,6 +193,10 @@ VALUES (
     (SELECT id FROM roles WHERE name = 'ROLE_API_CLIENT')
 );
 
+-- update application table to add reference to creator
+ALTER TABLE applications ADD COLUMN created_by_id BIGINT NOT NULL REFERENCES users(id);
+
 -- Create indexes for better performance
 CREATE INDEX idx_user_username ON users(username);
 CREATE INDEX idx_user_email ON users(email);
+CREATE INDEX idx_applications_created_by ON applications(created_by_id);

@@ -11,6 +11,7 @@ import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -20,21 +21,40 @@ import org.springframework.test.context.ActiveProfiles;
 
 import com.insurance.premium.application.domain.Application;
 import com.insurance.premium.application.domain.Application.Status;
+import com.insurance.premium.security.domain.User;
+import com.insurance.premium.security.repository.UserRepository;
 
 @DataJpaTest
+@AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
 @ActiveProfiles("test")
 class ApplicationRepositoryTest {
 
     @Autowired
     private ApplicationRepository applicationRepository;
     
+    @Autowired
+    private UserRepository userRepository;
+    
     private LocalDateTime now;
+    private User testUser;
     
     @BeforeEach
     void setUp() {
-        // Clear the repository before each test
         applicationRepository.deleteAll();
         now = LocalDateTime.now();
+        
+        // Create a test user for applications
+        testUser = new User();
+        testUser.setUsername("testuser");
+        testUser.setPassword("password");
+        testUser.setEmail("test@example.com");
+        testUser.setFirstName("Test");
+        testUser.setLastName("User");
+        testUser.setEnabled(true);
+        testUser.setAccountNonExpired(true);
+        testUser.setAccountNonLocked(true);
+        testUser.setCredentialsNonExpired(true);
+        testUser = userRepository.save(testUser);
     }
     
     @Test
@@ -241,7 +261,8 @@ class ApplicationRepositoryTest {
             new BigDecimal("1.0"), // regionFactor
             new BigDecimal("500.00"), // calculatedPremium
             createdAt,
-            status
+            status,
+            testUser // Add the createdBy parameter
         );
     }
 }

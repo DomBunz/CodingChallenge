@@ -4,6 +4,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.annotation.Validated;
@@ -15,6 +17,8 @@ import com.insurance.premium.application.repository.ApplicationRepository;
 import com.insurance.premium.calculation.dto.PremiumCalculationRequest;
 import com.insurance.premium.calculation.dto.PremiumCalculationResult;
 import com.insurance.premium.calculation.service.PremiumCalculationService;
+import com.insurance.premium.security.domain.User;
+import com.insurance.premium.security.service.UserService;
 
 import jakarta.validation.Valid;
 
@@ -34,11 +38,14 @@ public class ApplicationService {
     
     private final ApplicationRepository applicationRepository;
     private final PremiumCalculationService calculationService;
+    private final UserService userService;
     
     public ApplicationService(ApplicationRepository applicationRepository, 
-                             PremiumCalculationService calculationService) {
+                             PremiumCalculationService calculationService,
+                             UserService userService) {
         this.applicationRepository = applicationRepository;
         this.calculationService = calculationService;
+        this.userService = userService;
     }
     
     /**
@@ -59,10 +66,16 @@ public class ApplicationService {
                 request.postalCode(), request.vehicleType(), request.annualMileage());
         PremiumCalculationResult result = calculationService.calculatePremium(calcRequest);
         
+        // Get current authenticated user
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        String username = authentication.getName();
+        Optional<User> currentUser = userService.findByUsername(username);
+        
+        // Create the application with the correct constructor
         Application application = new Application(
                 request.annualMileage(), request.vehicleType(), request.postalCode(), result.basePremium(),
                 result.mileageFactor(), result.vehicleTypeFactor(), result.regionFactor(), result.premium(),
-                LocalDateTime.now(), Status.NEW);
+                LocalDateTime.now(), Status.NEW, currentUser.orElse(null));
         
         Application savedApplication = applicationRepository.save(application);
         logger.info("Created application [id={}] with premium={} for postalCode={}, vehicleType={}, annualMileage={}",
@@ -147,6 +160,55 @@ public class ApplicationService {
         List<Application> applications = applicationRepository.findByStatus(status);
         logger.debug(LOG_RETRIEVED_APPLICATIONS, applications.size());
         return applications;
+    }
+    
+    /**
+     * Get applications created by the current authenticated user with pagination
+     * 
+     * @param pageable Pagination information
+     * @return Page of applications created by the current user
+     */
+    @Transactional(readOnly = true)
+    public Page<Application> getMyApplications(Pageable pageable) {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        String username = authentication.getName();
+        Optional<User> currentUser = userService.findByUsername(username);
+        
+        if (currentUser.isPresent()) {
+            logger.debug("Retrieving applications for user {} with pagination [page={}, size={}]", 
+                    username, pageable.getPageNumber(), pageable.getPageSize());
+            Page<Application> applications = applicationRepository.findByCreatedBy(currentUser.get(), pageable);
+            logger.debug(LOG_RETRIEVED_APPLICATIONS, applications.getTotalElements());
+            return applications;
+        } else {
+            logger.warn("User not found: {}", username);
+            return Page.empty(pageable);
+        }
+    }
+    
+    /**
+     * Get applications created by the current authenticated user with a specific status and pagination
+     * 
+     * @param status The application status to filter by
+     * @param pageable Pagination information
+     * @return Page of applications created by the current user with the given status
+     */
+    @Transactional(readOnly = true)
+    public Page<Application> getMyApplicationsByStatus(Status status, Pageable pageable) {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        String username = authentication.getName();
+        Optional<User> currentUser = userService.findByUsername(username);
+        
+        if (currentUser.isPresent()) {
+            logger.debug("Retrieving applications for user {} with status {} and pagination [page={}, size={}]", 
+                    username, status, pageable.getPageNumber(), pageable.getPageSize());
+            Page<Application> applications = applicationRepository.findByCreatedByAndStatus(currentUser.get(), status, pageable);
+            logger.debug(LOG_RETRIEVED_APPLICATIONS, applications.getTotalElements());
+            return applications;
+        } else {
+            logger.warn("User not found: {}", username);
+            return Page.empty(pageable);
+        }
     }
     
     /**

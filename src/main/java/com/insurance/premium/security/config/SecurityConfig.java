@@ -7,7 +7,6 @@ import org.springframework.security.config.annotation.authentication.configurati
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
-import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.annotation.web.configurers.HeadersConfigurer.FrameOptionsConfig;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -50,24 +49,52 @@ public class SecurityConfig {
         final String ROLE_CUSTOMER = "ROLE_CUSTOMER";
         
         http
-            .csrf(AbstractHttpConfigurer::disable)
+            .csrf(csrf -> csrf
+                .ignoringRequestMatchers("/api/**", "/submit-application", "/calculate-premium")
+            )
             .authorizeHttpRequests(auth -> auth
                 // Public endpoints
                 .requestMatchers("/api/public/**", "/h2-console/**", "/swagger-ui/**", "/v3/api-docs/**", "/swagger-ui.html").permitAll()
-                // API endpoints require authentication
-                .requestMatchers("/api/applications/**").hasAnyAuthority(ROLE_ADMIN, ROLE_AGENT, ROLE_API_CLIENT)
-                .requestMatchers("/api/calculations/**").hasAnyAuthority(ROLE_ADMIN, ROLE_AGENT, ROLE_API_CLIENT)
-                // Admin endpoints
+                .requestMatchers("/css/**", "/js/**", "/images/**", "/webjars/**").permitAll()
+                .requestMatchers("/login", "/error").permitAll()
+                
+                // Common web endpoints
+                .requestMatchers("/dashboard").authenticated()
+                .requestMatchers("/application-form", "/calculate-premium", "/submit-application").authenticated()
+                .requestMatchers("/user/change-password").authenticated()
+                
+                // Customer only endpoints
+                .requestMatchers("/my-applications").hasAuthority(ROLE_CUSTOMER)
+                
+                // Admin & Agent only endpoints
+                .requestMatchers("/applications", "/applications/**").hasAnyAuthority(ROLE_ADMIN, ROLE_AGENT)
+                
+                // Admin only endpoints
+                .requestMatchers("/admin/**", "/users/**").hasAuthority(ROLE_ADMIN)
                 .requestMatchers("/api/admin/**").hasAuthority(ROLE_ADMIN)
+                
+                // API endpoints with role-based access
+                .requestMatchers("/api/applications/*/status/**").hasAnyAuthority(ROLE_ADMIN, ROLE_AGENT)
+                .requestMatchers("/api/applications").hasAnyAuthority(ROLE_ADMIN, ROLE_AGENT, ROLE_API_CLIENT)
+                .requestMatchers("/api/applications/my").hasAnyAuthority(ROLE_ADMIN, ROLE_AGENT, ROLE_CUSTOMER)
+                
+                // Premium calculation endpoints
+                .requestMatchers("/api/premium/**").authenticated()
+                
+                // Configuration endpoints - admin only
+                .requestMatchers("/api/config/**").hasAuthority(ROLE_ADMIN)
+                
                 // Agent endpoints
                 .requestMatchers("/api/agent/**").hasAnyAuthority(ROLE_ADMIN, ROLE_AGENT)
+                
                 // Customer endpoints
                 .requestMatchers("/api/customer/**").hasAnyAuthority(ROLE_ADMIN, ROLE_CUSTOMER)
+                
                 // Default security for any other endpoint
                 .anyRequest().authenticated()
             )
             .sessionManagement(session -> session
-                .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
+                .sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED)
             )
             .formLogin(form -> form
                 .loginPage("/login")

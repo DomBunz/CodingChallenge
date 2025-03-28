@@ -36,16 +36,13 @@ Um die Datenbank zu stoppen und alle Daten zu löschen:
 docker-compose down -v
 ```
 
-## Backend-Services starten
+## Services starten
 
 ```bash
 # Starten der Backend-Services
 mvn spring-boot:run
 ```
-
-## Frontend starten
-
-TODO
+Das Frontend ist unter http://localhost:8080/login erreichbar.
 
 ## API-Dokumentation
 

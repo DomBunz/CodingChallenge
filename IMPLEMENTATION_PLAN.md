@@ -384,7 +384,7 @@ Ich würde folgende Frameworks verwenden:
 
 5. **Optional**
    - Implementierung von Spring Security (done)
-   - Implementierung der Thymeleaf-Templates
+   - Implementierung der Thymeleaf-Templates (done)
 
 ## Mögliche zukünftige Erweiterungen
 
