@@ -124,4 +124,15 @@ public class PremiumCalculationController {
         List<PostcodeResponse> postcodes = calculationService.getPostcodesByPrefix(prefix);
         return ResponseEntity.ok(postcodes);
     }
+    
+    @GetMapping("/postcodes/search/term/{searchTerm}")
+    @Operation(summary = "Search postcodes by area, city, or district", 
+               description = "Returns postcodes where area, city, or district contains the given search term")
+    public ResponseEntity<List<PostcodeResponse>> getPostcodesByAreaCityOrDistrict(
+            @Parameter(description = "Search term to look for in area, city, or district", required = true)
+            @PathVariable String searchTerm) {
+        logger.debug("REST request to search postcodes by area, city, or district containing: {}", searchTerm);
+        List<PostcodeResponse> postcodes = calculationService.getPostcodesByAreaCityOrDistrict(searchTerm);
+        return ResponseEntity.ok(postcodes);
+    }
 }

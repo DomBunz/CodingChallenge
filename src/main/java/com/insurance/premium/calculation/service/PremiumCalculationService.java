@@ -190,6 +190,20 @@ public class PremiumCalculationService {
     }
     
     /**
+     * Search postcodes by area, city, or district containing the given search term
+     * 
+     * @param searchTerm The search term to look for in area, city, or district
+     * @return List of matching postcode responses
+     */
+    @Transactional(readOnly = true)
+    public List<PostcodeResponse> getPostcodesByAreaCityOrDistrict(String searchTerm) {
+        logger.debug("Searching postcodes by area, city, or district containing: {}", searchTerm);
+        return regionRepository.findByAreaCityOrDistrictContaining(searchTerm).stream()
+                .map(PostcodeResponse::fromRegion)
+                .toList();
+    }
+    
+    /**
      * Find the region factor for a postal code
      * 
      * @param postalCode The postal code
